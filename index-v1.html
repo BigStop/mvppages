@@ -1,0 +1,2935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Copper Still — Bar & Catering</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --amber: #C8861A;
+    --amber-light: #E8A832;
+    --amber-glow: #F0B84A;
+    --copper: #A0522D;
+    --dark: #0A0806;
+    --dark-2: #110E09;
+    --dark-3: #1A1510;
+    --dark-4: #221C14;
+    --dark-5: #2C2418;
+    --text: #E8DDD0;
+    --text-muted: #8A7A68;
+    --text-dim: #5A4E40;
+    --border: rgba(200, 134, 26, 0.2);
+    --border-bright: rgba(200, 134, 26, 0.5);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  ::selection {
+    background: var(--amber);
+    color: var(--dark);
+  }
+
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--dark-2); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--dark-5);
+    border-radius: 5px;
+    border: 2px solid var(--dark-2);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--amber); }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* ============ LOADER ============ */
+  /* ============ LOADER ============ */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: #060402;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    transition: opacity 0.7s ease, visibility 0.7s ease;
+  }
+
+  #loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .loader-scene {
+    position: relative;
+    width: 160px;
+    height: 260px;
+  }
+
+  .bottle-wrap {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%) rotate(0deg);
+    /* pivot on the bottle mouth so the pour point never drifts */
+    transform-origin: 22px 0;
+    animation: bottleTilt 1.8s cubic-bezier(.4,0,.2,1) 0.4s forwards;
+  }
+
+  @keyframes bottleTilt {
+    0%   { transform: translateX(-50%) rotate(0deg); }
+    30%  { transform: translateX(-50%) rotate(-38deg); }
+    70%  { transform: translateX(-50%) rotate(-38deg); }
+    85%  { transform: translateX(-50%) rotate(-38deg); }
+    100% { transform: translateX(-50%) rotate(0deg); }
+  }
+
+  .pour-stream {
+    position: absolute;
+    left: 77.5px;
+    top: 6px;
+    width: 5px;
+    height: 0;
+    background: linear-gradient(180deg,
+      var(--amber-glow) 0%,
+      var(--amber) 50%,
+      rgba(200,134,26,0.55) 85%,
+      transparent 100%);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 0 8px rgba(240,184,74,0.45);
+    opacity: 0;
+    animation: pourStream 1.8s ease 0.4s forwards;
+  }
+
+  @keyframes pourStream {
+    0%   { height: 0;     opacity: 0; }
+    18%  { height: 0;     opacity: 0; }
+    28%  { height: 190px; opacity: 1; }
+    65%  { height: 198px; opacity: 1; }
+    80%  { height: 100px; opacity: 0.7; }
+    94%  { height: 0;     opacity: 0; }
+    100% { height: 0;     opacity: 0; }
+  }
+
+  .splash {
+    position: absolute;
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--amber-glow);
+    bottom: 46px; left: 50%;
+    opacity: 0;
+    animation: splashUp 0.45s ease-out 2;
+  }
+
+  .splash-1 { --dx: -12px; animation-delay: 1.0s; }
+  .splash-2 { --dx:  10px; animation-delay: 1.15s; }
+  .splash-3 { --dx:  -6px; animation-delay: 1.3s; }
+  .splash-4 { --dx:  14px; animation-delay: 1.05s; }
+
+  @keyframes splashUp {
+    0%   { opacity: 0;   transform: translate(0, 0) scale(0.6); }
+    25%  { opacity: 0.9; }
+    100% { opacity: 0;   transform: translate(var(--dx), -16px) scale(1); }
+  }
+
+  .glass-wrap {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .glass-liquid {
+    position: absolute;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 42px;
+    height: 0;
+    background: linear-gradient(180deg, rgba(240,184,74,0.7), rgba(200,134,26,0.9));
+    border-radius: 0 0 6px 6px;
+    animation: fillGlass 1.8s ease 0.4s forwards;
+    overflow: hidden;
+  }
+
+  .glass-liquid::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: rgba(255,220,120,0.6);
+    border-radius: 50%;
+    animation: liquidShimmer 0.6s ease infinite alternate;
+  }
+
+  @keyframes liquidShimmer {
+    from { opacity: 0.4; transform: scaleX(0.9); }
+    to   { opacity: 1;   transform: scaleX(1.02); }
+  }
+
+  @keyframes fillGlass {
+    0%   { height: 0; }
+    30%  { height: 0; }
+    75%  { height: 38px; }
+    100% { height: 38px; }
+  }
+
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 210, 100, 0.5);
+    animation: bubbleRise 1s ease infinite;
+    opacity: 0;
+  }
+
+  .bubble-1 { width: 4px; height: 4px; left: 14px; bottom: 14px; animation-delay: 1s;    animation-duration: 0.9s; }
+  .bubble-2 { width: 3px; height: 3px; left: 24px; bottom: 14px; animation-delay: 1.15s; animation-duration: 1.1s; }
+  .bubble-3 { width: 3px; height: 3px; left: 34px; bottom: 14px; animation-delay: 1.3s;  animation-duration: 0.95s; }
+
+  @keyframes bubbleRise {
+    0%   { opacity: 0; transform: translateY(0); }
+    20%  { opacity: 0.8; }
+    100% { opacity: 0; transform: translateY(-30px); }
+  }
+
+  .steam {
+    position: absolute;
+    bottom: 56px; left: 50%;
+    width: 2px;
+    background: rgba(240,184,74,0.4);
+    border-radius: 2px;
+    opacity: 0;
+    animation: steamRise 1.2s ease infinite;
+  }
+
+  .steam-1 { height: 16px; margin-left: -8px; animation-delay: 1.1s; }
+  .steam-2 { height: 20px; margin-left: 0px;  animation-delay: 1.35s; }
+  .steam-3 { height: 14px; margin-left: 8px;  animation-delay: 1.55s; }
+
+  @keyframes steamRise {
+    0%   { opacity: 0; transform: translateY(0) scaleX(1); }
+    40%  { opacity: 0.5; }
+    100% { opacity: 0; transform: translateY(-22px) scaleX(2); }
+  }
+
+  .loader-brand {
+    margin-top: 2.5rem;
+    text-align: center;
+    animation: fadeIn 0.6s 0.2s both;
+  }
+
+  .loader-brand .name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--amber-glow);
+    letter-spacing: 0.08em;
+    display: block;
+    animation: trackIn 1.3s cubic-bezier(.16,1,.3,1) 0.3s both;
+  }
+
+  @keyframes trackIn {
+    from { letter-spacing: 0.4em; opacity: 0; filter: blur(5px); }
+    to   { letter-spacing: 0.08em; opacity: 1; filter: blur(0); }
+  }
+
+  .loader-brand .tagline {
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 6px;
+    display: block;
+    animation: fadeUp 0.8s ease 0.9s both;
+  }
+
+  .loader-progress {
+    margin-top: 2rem;
+    width: 140px;
+    height: 1px;
+    background: rgba(200,134,26,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loader-progress::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--amber-glow), transparent);
+    animation: progressSweep 1.7s ease 0.4s forwards;
+  }
+
+  @keyframes progressSweep {
+    0%   { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  .loader-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--amber);
+    animation: progressFill 1.9s ease 0.3s forwards;
+  }
+
+  @keyframes progressFill {
+    0%   { width: 0%; }
+    100% { width: 100%; }
+  }
+
+  .loader-glow {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,134,26,0.18) 0%, transparent 70%);
+    bottom: -20px; left: 50%;
+    transform: translateX(-50%);
+    animation: glowPulse 1.5s ease-in-out 1s infinite alternate;
+  }
+
+  @keyframes glowPulse {
+    from { opacity: 0.5; transform: translateX(-50%) scale(0.9); }
+    to   { opacity: 1;   transform: translateX(-50%) scale(1.15); }
+  }
+
+  .ice {
+    position: absolute;
+    width: 8px; height: 8px;
+    border: 1px solid rgba(180,220,255,0.5);
+    background: rgba(180,220,255,0.12);
+    border-radius: 2px;
+    opacity: 0;
+    animation: iceFall 0.4s ease forwards;
+  }
+
+  .ice-1 { top: 110px; left: calc(50% - 8px); animation-delay: 0.55s; }
+  .ice-2 { top: 110px; left: calc(50% + 2px);  animation-delay: 0.68s; }
+
+  @keyframes iceFall {
+    0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
+    30%  { opacity: 0.85; }
+    100% { opacity: 0; transform: translateY(72px) rotate(45deg); }
+  }
+
+  .loader-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(200,134,26,0.12);
+    animation: ringExpand 2s ease-out infinite;
+  }
+
+  .loader-ring:nth-child(1) { width: 200px; height: 200px; top: 20px; left: 50%; transform: translateX(-50%); animation-delay: 0s; }
+  .loader-ring:nth-child(2) { width: 260px; height: 260px; top: -10px; left: 50%; transform: translateX(-50%); animation-delay: 0.5s; }
+
+  @keyframes ringExpand {
+    0%   { opacity: 0.5; transform: translateX(-50%) scale(0.8); }
+    100% { opacity: 0;   transform: translateX(-50%) scale(1.2); }
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: var(--amber-glow);
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkleAnim 1.8s ease infinite;
+  }
+
+  .sp1 { top: 60px;  left: 30px;  animation-delay: 1.1s; }
+  .sp2 { top: 40px;  right: 25px; animation-delay: 1.4s; }
+  .sp3 { top: 100px; right: 18px; animation-delay: 0.9s; }
+  .sp4 { top: 80px;  left: 16px;  animation-delay: 1.6s; }
+
+  @keyframes sparkleAnim {
+    0%, 100% { opacity: 0; transform: scale(0); }
+    50%       { opacity: 1; transform: scale(1.5); }
+  }
+  /* ============ END LOADER ============ */
+
+  /* GRAIN TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 0 5%;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10, 8, 6, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+
+  nav.scrolled {
+    height: 60px;
+    background: rgba(10, 8, 6, 0.97);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--amber-glow);
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-logo span {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    display: block;
+    line-height: 1;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--amber-light); }
+
+  .nav-cta {
+    background: transparent;
+    border: 1px solid var(--amber);
+    color: var(--amber-light) !important;
+    padding: 9px 22px;
+    border-radius: 2px;
+    transition: all 0.3s !important;
+    box-shadow: 0 0 20px rgba(200, 134, 26, 0.1);
+  }
+
+  .nav-cta:hover {
+    background: var(--amber) !important;
+    color: var(--dark) !important;
+    box-shadow: 0 0 30px rgba(200, 134, 26, 0.35) !important;
+  }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 1.5px;
+    background: var(--amber-light);
+    transition: all 0.3s;
+  }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 5% 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(200, 134, 26, 0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(160, 82, 45, 0.05) 0%, transparent 60%),
+      linear-gradient(180deg, var(--dark) 0%, var(--dark-2) 100%);
+  }
+
+  .hero-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,134,26,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,134,26,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 70%);
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--amber);
+    opacity: 0.5;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 7vw, 6.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.5s forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--amber-glow);
+    display: block;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 520px;
+    margin: 0 auto 3rem;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.7s forwards;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.9s forwards;
+  }
+
+  .btn-primary {
+    background: var(--amber);
+    color: var(--dark);
+    padding: 15px 36px;
+    border: none;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 40px rgba(200, 134, 26, 0.25);
+    display: inline-block;
+  }
+
+  .btn-primary:hover {
+    background: var(--amber-glow);
+    box-shadow: 0 0 60px rgba(200, 134, 26, 0.45);
+    transform: translateY(-2px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    padding: 14px 36px;
+    border: 1px solid rgba(232, 221, 208, 0.25);
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-block;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--amber);
+    color: var(--amber-light);
+    transform: translateY(-2px);
+  }
+
+  .hero-divider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+    opacity: 0.4;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeIn 1s 1.5s forwards;
+  }
+
+  .scroll-hint span {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(180deg, var(--amber) 0%, transparent 100%);
+    animation: scrollPulse 2s infinite;
+  }
+
+  /* SECTION SHARED */
+  section { padding: 120px 5%; }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1.2rem;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--amber-glow);
+  }
+
+  /* ABOUT */
+  #about {
+    background: var(--dark-2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .about-copy p {
+    color: var(--text-muted);
+    margin-top: 1.5rem;
+    font-weight: 300;
+    font-size: 1.05rem;
+  }
+
+  .about-copy p + p { margin-top: 1rem; }
+
+  .about-quote {
+    margin-top: 2.5rem;
+    padding: 1.5rem;
+    border-left: 2px solid var(--amber);
+    background: rgba(200, 134, 26, 0.04);
+  }
+
+  .about-quote p {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--text) !important;
+    margin: 0 !important;
+  }
+
+  .stats-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .stat-cell {
+    background: var(--dark-3);
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: background 0.3s;
+  }
+
+  .stat-cell:hover { background: var(--dark-4); }
+
+  .stat-cell.wide {
+    grid-column: 1 / -1;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--amber-glow);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    font-weight: 500;
+  }
+
+  /* SERVICES */
+  #services { background: var(--dark); }
+
+  .services-header {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .service-card {
+    background: var(--dark-2);
+    padding: 3.5rem 2.5rem;
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  .service-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s;
+  }
+
+  .service-card:hover { background: var(--dark-3); transform: translateY(-4px); }
+  .service-card:hover::after { transform: scaleX(1); }
+
+  .service-icon {
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    color: var(--amber);
+    font-size: 1.3rem;
+    transition: all 0.4s;
+  }
+
+  .service-card:hover .service-icon {
+    background: rgba(200, 134, 26, 0.1);
+    box-shadow: 0 0 20px rgba(200, 134, 26, 0.2);
+  }
+
+  .service-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  .service-card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  .service-card .learn-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    text-decoration: none;
+    transition: gap 0.3s;
+  }
+
+  .service-card:hover .learn-more { gap: 14px; }
+
+  /* GALLERY */
+  #gallery {
+    background: var(--dark-2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .gallery-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 240px 240px;
+    gap: 6px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .gallery-tile {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .gallery-tile:first-child { grid-row: 1 / 3; }
+  .gallery-tile:nth-child(4) { grid-column: 2 / 4; }
+
+  .tile-bg {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s ease;
+  }
+
+  .gallery-tile:hover .tile-bg { transform: scale(1.05); }
+
+  .tile-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(10,8,6,0.85) 100%);
+    display: flex;
+    align-items: flex-end;
+    padding: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .gallery-tile:hover .tile-overlay { opacity: 1; }
+
+  .tile-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber-glow);
+  }
+
+  .tile-bg-1 { background: linear-gradient(135deg, #1A1208 0%, #2D1F0A 40%, #3D2B10 100%); }
+  .tile-bg-2 { background: linear-gradient(135deg, #0F1218 0%, #1A1E28 50%, #0E1520 100%); }
+  .tile-bg-3 { background: linear-gradient(135deg, #160C0A 0%, #221210 50%, #2A1612 100%); }
+  .tile-bg-4 { background: linear-gradient(135deg, #101510 0%, #1A2415 50%, #0E1A0C 100%); }
+  .tile-bg-5 { background: linear-gradient(135deg, #1A1018 0%, #221525 50%, #1A0F1E 100%); }
+  .tile-bg-6 { background: linear-gradient(135deg, #181208 0%, #2A1E0C 50%, #221808 100%); }
+
+  .tile-pattern {
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+  }
+
+  /* BOOKING */
+  #booking { background: var(--dark); }
+
+  .booking-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .booking-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .booking-header p {
+    color: var(--text-muted);
+    margin-top: 1rem;
+    font-weight: 300;
+  }
+
+  .booking-form {
+    background: var(--dark-3);
+    border: 1px solid var(--border);
+    padding: 3.5rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-group label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background: var(--dark-4);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 300;
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+
+  .form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C8861A' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+
+  .form-group select option { background: #1A1510; }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(200, 134, 26, 0.08);
+  }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder { color: var(--text-dim); }
+
+  .form-group textarea { resize: vertical; min-height: 120px; }
+
+  .form-group input.error,
+  .form-group select.error,
+  .form-group textarea.error {
+    border-color: #8B3A3A;
+  }
+
+  .error-msg {
+    font-size: 0.75rem;
+    color: #B85555;
+    display: none;
+  }
+
+  .error-msg.show { display: block; }
+
+  .form-submit {
+    margin-top: 2.5rem;
+    text-align: center;
+  }
+
+  .form-submit button {
+    background: var(--amber);
+    color: var(--dark);
+    padding: 18px 56px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 40px rgba(200, 134, 26, 0.2);
+  }
+
+  .form-submit button:hover {
+    background: var(--amber-glow);
+    box-shadow: 0 0 60px rgba(200, 134, 26, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .success-msg {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .success-msg.show { display: block; }
+
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    border: 1px solid var(--amber);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 1.5rem;
+    color: var(--amber);
+    animation: popIn 0.5s ease;
+  }
+
+  .success-msg h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--amber-glow);
+    margin-bottom: 1rem;
+  }
+
+  .success-msg p { color: var(--text-muted); }
+
+  /* TESTIMONIALS */
+  #testimonials {
+    background: var(--dark-2);
+    border-top: 1px solid var(--border);
+  }
+
+  .testimonials-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .testimonial-card {
+    background: var(--dark-3);
+    padding: 3rem 2.5rem;
+    position: relative;
+  }
+
+  .testimonial-card::before {
+    content: '\201C';
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    color: var(--amber);
+    opacity: 0.15;
+    position: absolute;
+    top: 1rem;
+    left: 2rem;
+    line-height: 1;
+  }
+
+  .stars {
+    color: var(--amber);
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    margin-bottom: 1.5rem;
+  }
+
+  .testimonial-card blockquote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .author-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    background: rgba(200, 134, 26, 0.15);
+    color: var(--amber);
+    border: 1px solid var(--border-bright);
+    flex-shrink: 0;
+  }
+
+  .author-info strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .author-info span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+    padding: 80px 5% 40px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-bottom: 4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .footer-brand p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-top: 1rem;
+    max-width: 260px;
+    line-height: 1.8;
+  }
+
+  .footer-socials {
+    display: flex;
+    gap: 12px;
+    margin-top: 1.5rem;
+  }
+
+  .social-btn {
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .social-btn:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+    background: rgba(200, 134, 26, 0.08);
+  }
+
+  .footer-col h4 {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-col ul { list-style: none; }
+
+  .footer-col ul li {
+    margin-bottom: 0.8rem;
+  }
+
+  .footer-col ul li a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 300;
+    transition: color 0.3s;
+  }
+
+  .footer-col ul li a:hover { color: var(--amber-light); }
+
+  .footer-col .contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-bottom: 1rem;
+  }
+
+  .footer-col .contact-item i {
+    color: var(--amber);
+    margin-top: 3px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .footer-bottom {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-bottom p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .footer-bottom a {
+    color: var(--amber);
+    text-decoration: none;
+    font-size: 0.8rem;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 1; transform: scaleY(1); transform-origin: top; }
+    50% { opacity: 0.3; transform: scaleY(0.6); transform-origin: top; }
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* MOBILE MENU */
+  .mobile-menu {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 8, 6, 0.98);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    transform: translateX(100%);
+    transition: transform 0.4s ease;
+  }
+
+  .mobile-menu.open { transform: translateX(0); }
+
+  .mobile-menu a {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .mobile-menu a:hover { color: var(--amber-glow); }
+
+  .mobile-close {
+    position: absolute;
+    top: 24px; right: 5%;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .services-grid { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+    .gallery-tile:first-child { grid-row: auto; }
+    .gallery-tile:nth-child(4) { grid-column: auto; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+    .booking-form { padding: 2rem; }
+  }
+
+  @media (max-width: 600px) {
+    section { padding: 80px 5%; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+    .stats-block { grid-template-columns: 1fr; }
+    .stat-cell.wide { grid-column: 1; }
+
+    /* Gallery — single column on small phones */
+    .gallery-grid { grid-template-columns: 1fr; }
+
+    /* Quiz — single column options on small phones */
+    .quiz-options { grid-template-columns: 1fr; }
+    .quiz-box { padding: 2rem 1.25rem; }
+
+    /* Carousel — hide buttons (touch users swipe), remove side padding */
+    .carousel-btn { display: none; }
+    .menu-carousel-wrap { padding: 0; }
+
+    /* Calendar — slightly smaller text so cells aren't cramped */
+    .cal-day { font-size: 0.75rem; }
+    .calendar-wrap { padding: 1.25rem; }
+  }
+
+  /* ============ CUSTOM CURSOR ============ */
+  #cursor-dot { display: none; }
+
+  /* ============ PARTICLES ============ */
+  #particles-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ============ SPLIT TEXT HERO ============ */
+  .hero-title .word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+  .hero-title .word .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(100%);
+    animation: charReveal 0.7s cubic-bezier(.16,1,.3,1) forwards;
+  }
+
+  @keyframes charReveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ MAGNETIC BUTTONS ============ */
+  .magnetic { display: inline-block; }
+
+  /* ============ PARALLAX ============ */
+  .parallax-bg {
+    will-change: transform;
+  }
+
+  /* ============ COCKTAIL MENU SECTION ============ */
+  #menu {
+    background: var(--dark-2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .menu-header { text-align: center; margin-bottom: 4rem; }
+  .menu-header p { color: var(--text-muted); margin-top: 1rem; font-weight: 300; }
+
+  .menu-carousel-wrap {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 30px;
+  }
+
+  .menu-carousel {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1rem;
+    scrollbar-width: none;
+  }
+  .menu-carousel::-webkit-scrollbar { display: none; }
+
+  .menu-card {
+    flex: 0 0 280px;
+    height: 380px;
+    scroll-snap-align: start;
+    perspective: 1000px;
+    cursor: pointer;
+  }
+
+  .menu-card-inner {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(.4,0,.2,1);
+  }
+
+  .menu-card:hover .menu-card-inner,
+  .menu-card.flipped .menu-card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .menu-card-front, .menu-card-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .menu-card-front {
+    background: var(--dark-3);
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .menu-card-back {
+    background: var(--dark-4);
+    transform: rotateY(180deg);
+    justify-content: center;
+    border-color: var(--amber);
+  }
+
+  .menu-card-emoji {
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--amber);
+    filter: drop-shadow(0 0 12px rgba(200,134,26,0.35));
+  }
+
+  .menu-card-front h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+
+  .menu-card-front .price {
+    font-size: 1.1rem;
+    color: var(--amber-glow);
+    font-weight: 600;
+  }
+
+  .menu-card-front .category {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: auto;
+    margin-top: 0.5rem;
+  }
+
+  .menu-card-back h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--amber-glow);
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+
+  .menu-card-back .ingredients {
+    list-style: none;
+    margin-bottom: 1.5rem;
+  }
+
+  .menu-card-back .ingredients li {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(200,134,26,0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .menu-card-back .ingredients li::before {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--amber);
+    flex-shrink: 0;
+  }
+
+  .menu-card-back .desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.7;
+  }
+
+  .menu-card-back .flip-hint {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .menu-card-front .flip-hint {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 0.8rem;
+  }
+
+  .carousel-btn {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px;
+    background: rgba(10,8,6,0.9);
+    border: 1px solid var(--border-bright);
+    color: var(--amber);
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s;
+  }
+  .carousel-btn:hover { background: var(--amber); color: var(--dark); }
+  .carousel-btn.prev { left: 0; }
+  .carousel-btn.next { right: 0; }
+
+  /* ============ AVAILABILITY CALENDAR ============ */
+  .calendar-wrap {
+    max-width: 480px;
+    margin: 3rem auto 0;
+    background: var(--dark-3);
+    border: 1px solid var(--border);
+    padding: 2rem;
+  }
+
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .cal-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--amber-glow);
+  }
+
+  .cal-nav {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--amber);
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+  }
+  .cal-nav:hover { background: var(--amber); color: var(--dark); }
+
+  .cal-days-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .cal-days-header span {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 4px 0;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82rem;
+    border-radius: 2px;
+    cursor: default;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .cal-day.empty { background: transparent; }
+  .cal-day.past { color: var(--text-dim); }
+
+  .cal-day.available {
+    background: rgba(76,175,80,0.1);
+    color: var(--text);
+    cursor: pointer;
+    border: 1px solid rgba(76,175,80,0.2);
+  }
+  .cal-day.available:hover {
+    background: rgba(76,175,80,0.25);
+    border-color: rgba(76,175,80,0.5);
+    transform: scale(1.08);
+  }
+
+  .cal-day.booked {
+    background: rgba(200,134,26,0.08);
+    color: var(--text-dim);
+    border: 1px solid rgba(200,134,26,0.15);
+    text-decoration: line-through;
+  }
+
+  .cal-day.today {
+    border: 1px solid var(--amber);
+    color: var(--amber-glow);
+    font-weight: 700;
+  }
+
+  .cal-day.selected {
+    background: var(--amber) !important;
+    color: var(--dark) !important;
+    font-weight: 700;
+    border-color: var(--amber-glow) !important;
+  }
+
+  .cal-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.2rem;
+    justify-content: center;
+  }
+
+  .cal-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+  }
+  .legend-dot.available { background: rgba(76,175,80,0.4); border: 1px solid rgba(76,175,80,0.5); }
+  .legend-dot.booked    { background: rgba(200,134,26,0.2); border: 1px solid rgba(200,134,26,0.3); }
+  .legend-dot.today-l   { background: transparent; border: 1px solid var(--amber); }
+
+  /* ============ COCKTAIL QUIZ ============ */
+  #quiz {
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+  }
+
+  .quiz-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .quiz-header { margin-bottom: 3rem; }
+  .quiz-header p { color: var(--text-muted); margin-top: 1rem; font-weight: 300; }
+
+  .quiz-box {
+    background: var(--dark-3);
+    border: 1px solid var(--border);
+    padding: 3rem 2.5rem;
+  }
+
+  .quiz-question {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--text);
+    margin-bottom: 2rem;
+    min-height: 60px;
+  }
+
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .quiz-opt {
+    background: var(--dark-4);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 14px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+    border-radius: 0;
+  }
+
+  .quiz-opt:hover {
+    border-color: var(--amber);
+    color: var(--text);
+    background: rgba(200,134,26,0.06);
+  }
+
+  .quiz-opt.selected {
+    border-color: var(--amber-glow);
+    background: rgba(200,134,26,0.12);
+    color: var(--amber-glow);
+  }
+
+  .quiz-progress {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  .quiz-pip {
+    width: 28px; height: 3px;
+    background: var(--dark-5);
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+  .quiz-pip.active { background: var(--amber); }
+  .quiz-pip.done   { background: rgba(200,134,26,0.4); }
+
+  .quiz-result {
+    display: none;
+    padding: 1rem 0;
+  }
+
+  .quiz-result.show { display: block; }
+
+  .quiz-cocktail-emoji {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1.5rem;
+    color: var(--amber-glow);
+    filter: drop-shadow(0 0 20px rgba(200,134,26,0.45));
+  }
+
+  .quiz-cocktail-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--amber-glow);
+    margin-bottom: 0.5rem;
+  }
+
+  .quiz-cocktail-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+
+  /* ============ 3D TILT ============ */
+  .tilt-card {
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease;
+  }
+
+  .tilt-card .tilt-shine {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .tilt-card:hover .tilt-shine { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
+    <div class="loader-ring"></div>
+    <div class="loader-ring"></div>
+    <div class="sparkle sp1"></div>
+    <div class="sparkle sp2"></div>
+    <div class="sparkle sp3"></div>
+    <div class="sparkle sp4"></div>
+    <div class="loader-scene">
+      <div class="loader-glow"></div>
+      <div class="bottle-wrap">
+        <svg width="44" height="110" viewBox="0 0 44 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="16" y="-4" width="12" height="6" rx="2" fill="rgba(200,134,26,0.8)"/>
+          <rect x="18" y="0" width="8" height="18" rx="2" fill="#2A1F0E" stroke="rgba(200,134,26,0.4)" stroke-width="1"/>
+          <rect x="14" y="18" width="16" height="4" rx="1" fill="rgba(200,134,26,0.3)"/>
+          <path d="M14 22 Q8 30 8 45 L8 90 Q8 100 22 100 Q36 100 36 90 L36 45 Q36 30 30 22 Z" fill="#1A1208" stroke="rgba(200,134,26,0.45)" stroke-width="1"/>
+          <path d="M10 55 Q10 60 10 90 Q10 98 22 98 Q34 98 34 90 L34 55 Z" fill="rgba(200,134,26,0.35)"/>
+          <path d="M13 35 Q11 50 11 70" stroke="rgba(255,210,120,0.15)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="pour-stream"></div>
+      <div class="ice ice-1"></div>
+      <div class="ice ice-2"></div>
+      <div class="glass-wrap">
+        <div class="glass-liquid">
+          <div class="bubble bubble-1"></div>
+          <div class="bubble bubble-2"></div>
+          <div class="bubble bubble-3"></div>
+        </div>
+        <div class="splash splash-1"></div>
+        <div class="splash splash-2"></div>
+        <div class="splash splash-3"></div>
+        <div class="splash splash-4"></div>
+        <div class="steam steam-1"></div>
+        <div class="steam steam-2"></div>
+        <div class="steam steam-3"></div>
+        <svg width="66" height="80" viewBox="0 0 66 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:2;">
+          <path d="M8 8 L14 68 Q14 76 33 76 Q52 76 52 68 L58 8 Z" fill="rgba(180,220,255,0.04)" stroke="rgba(180,220,255,0.35)" stroke-width="1.2"/>
+          <ellipse cx="33" cy="9" rx="25" ry="5" fill="rgba(180,220,255,0.06)" stroke="rgba(180,220,255,0.4)" stroke-width="1"/>
+          <path d="M16 20 L18 58" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="18" y="38" width="13" height="10" rx="2" fill="rgba(180,220,255,0.12)" stroke="rgba(180,220,255,0.3)" stroke-width="0.8"/>
+          <rect x="33" y="42" width="11" height="9" rx="2" fill="rgba(180,220,255,0.10)" stroke="rgba(180,220,255,0.28)" stroke-width="0.7"/>
+        </svg>
+      </div>
+    </div>
+    <div class="loader-brand">
+      <span class="name">The Copper Still</span>
+      <span class="tagline">Bar &amp; Event Catering</span>
+    </div>
+    <div class="loader-progress">
+      <div class="loader-progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CURSOR -->
+<div id="cursor-dot">
+  <svg width="18" height="60" viewBox="0 0 18 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="bowlG" cx="38%" cy="35%" r="65%">
+        <stop offset="0%"   stop-color="#F5F5F5"/>
+        <stop offset="55%"  stop-color="#C8C8C8"/>
+        <stop offset="100%" stop-color="#888"/>
+      </radialGradient>
+      <linearGradient id="shaftG" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#A0A0A0"/>
+        <stop offset="45%"  stop-color="#E0E0E0"/>
+        <stop offset="100%" stop-color="#A0A0A0"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Spoon bowl -->
+    <ellipse cx="9" cy="7" rx="7.5" ry="6" fill="url(#bowlG)"/>
+    <!-- Bowl inner concave shadow -->
+    <ellipse cx="9" cy="7.5" rx="5" ry="3.8" fill="#B0B0B0" opacity="0.25"/>
+    <!-- Bowl highlight -->
+    <ellipse cx="6.5" cy="5" rx="2.5" ry="1.6" fill="white" opacity="0.45" transform="rotate(-10 6.5 5)"/>
+
+    <!-- Neck taper -->
+    <path d="M8 13 L8.5 17 L9.5 17 L10 13 Z" fill="#C0C0C0"/>
+
+    <!-- Shaft -->
+    <rect x="8.3" y="17" width="1.4" height="34" rx="0.7" fill="url(#shaftG)"/>
+
+    <!-- Twist highlights — two opposing sine waves -->
+    <path d="M8.3 17 Q12 20.5 8.3 24 Q12 27.5 8.3 31 Q12 34.5 8.3 38 Q12 41.5 8.3 45 Q12 48.5 8.3 51"
+          stroke="#ECECEC" stroke-width="0.9" fill="none" opacity="0.85"/>
+    <path d="M9.7 17 Q6 20.5 9.7 24 Q6 27.5 9.7 31 Q6 34.5 9.7 38 Q6 41.5 9.7 45 Q6 48.5 9.7 51"
+          stroke="#888" stroke-width="0.7" fill="none" opacity="0.6"/>
+
+    <!-- Flat paddle end -->
+    <path d="M8 51 Q7 53 7.5 57 Q8 60 9 60 Q10 60 10.5 57 Q11 53 10 51 Z" fill="#B8B8B8"/>
+    <!-- Paddle highlight -->
+    <path d="M8.4 52 Q8 54.5 8.2 57.5" stroke="#DEDEDE" stroke-width="0.6" stroke-linecap="round" opacity="0.7"/>
+  </svg>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    <div>
+      The Copper Still
+      <span>Est. 2018 · Bar & Catering</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+    <li><a href="#booking" class="nav-cta">Book an Event</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="toggleMenu()"><i class="fas fa-times"></i></button>
+  <a href="#about" onclick="toggleMenu()">About</a>
+  <a href="#services" onclick="toggleMenu()">Services</a>
+  <a href="#gallery" onclick="toggleMenu()">Gallery</a>
+  <a href="#menu" onclick="toggleMenu()">Menu</a>
+  <a href="#quiz" onclick="toggleMenu()">Quiz</a>
+  <a href="#testimonials" onclick="toggleMenu()">Reviews</a>
+  <a href="#booking" onclick="toggleMenu()">Book an Event</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="particles-canvas"></canvas>
+  <div class="hero-bg parallax-bg"></div>
+  <div class="hero-lines"></div>
+  <div style="position: relative; z-index: 2;">
+    <div class="hero-eyebrow">Bar & Event Catering</div>
+    <h1 class="hero-title">
+      Where Every Event<br>Becomes <em>Unforgettable</em>
+    </h1>
+    <p class="hero-subtitle">Award-winning cocktails. Impeccable catering. Intimate venue. We bring the bar to your celebration — wherever it may be.</p>
+    <div class="hero-btns">
+      <a href="#booking" class="btn-primary magnetic">Book Your Event</a>
+      <a href="#services" class="btn-outline magnetic">Explore Services</a>
+    </div>
+  </div>
+  <div class="hero-divider"></div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-copy reveal">
+      <div class="section-label">Our Story</div>
+      <h2 class="section-title">Craft drinks,<br><em>Crafted for you</em></h2>
+      <p>The Copper Still was born from a simple belief: that exceptional drinks and extraordinary hospitality belong together. Since 2018, we've been the city's best-kept secret for those who know that a truly great event starts with the bar.</p>
+      <p>Our mixologists have spent years perfecting the art of the cocktail — from classic recipes rooted in tradition to bold modern creations that spark conversation. We bring that expertise directly to your event, wherever it takes place.</p>
+      <div class="about-quote">
+        <p>"We don't just set up a bar. We craft an atmosphere."</p>
+      </div>
+    </div>
+    <div class="stats-block reveal reveal-delay-2">
+      <div class="stat-cell">
+        <div class="stat-num">7+</div>
+        <div class="stat-label">Years in Business</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">600+</div>
+        <div class="stat-label">Events Catered</div>
+      </div>
+      <div class="stat-cell wide">
+        <div class="stat-num">4,200+</div>
+        <div class="stat-label">Cocktails Crafted This Year</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="services-header reveal">
+    <div class="section-label">What We Do</div>
+    <h2 class="section-title">Tailored to your <em>occasion</em></h2>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal tilt-card"><div class="tilt-shine"></div>
+      <div class="service-icon"><i class="fas fa-cocktail"></i></div>
+      <h3>Bar Catering</h3>
+      <p>We bring a fully equipped, fully staffed bar to your location. Custom cocktail menus, premium spirits, professional bartenders — everything you need for drinks that impress.</p>
+      <a href="#booking" class="learn-more">Enquire <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i></a>
+    </div>
+    <div class="service-card reveal reveal-delay-1 tilt-card"><div class="tilt-shine"></div>
+      <div class="service-icon"><i class="fas fa-glass-cheers"></i></div>
+      <h3>Private Events</h3>
+      <p>Weddings, birthdays, anniversaries — we make your private celebration shine. Full catering packages available with bespoke cocktail design and stylish bar setup.</p>
+      <a href="#booking" class="learn-more">Enquire <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i></a>
+    </div>
+    <div class="service-card reveal reveal-delay-2 tilt-card"><div class="tilt-shine"></div>
+      <div class="service-icon"><i class="fas fa-briefcase"></i></div>
+      <h3>Corporate Events</h3>
+      <p>Product launches, client dinners, team celebrations. We deliver polished professionalism with a warm atmosphere — the perfect touch for events that leave an impression.</p>
+      <a href="#booking" class="learn-more">Enquire <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="gallery-header reveal">
+    <div class="section-label">Gallery</div>
+    <h2 class="section-title">Moments <em>worth remembering</em></h2>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-tile reveal">
+      <div class="tile-bg tile-bg-1" style="background: linear-gradient(160deg, #1E1408 0%, #3D2A0A 35%, #261C0A 65%, #1A1208 100%); display: flex; align-items: center; justify-content: center;">
+        <svg width="60%" height="60%" viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg" class="tile-pattern">
+          <path d="M100 20 L140 60 L130 160 L100 200 L70 160 L60 60 Z" stroke="rgba(200,134,26,0.3)" stroke-width="1" fill="rgba(200,134,26,0.05)"/>
+          <circle cx="100" cy="110" r="30" stroke="rgba(200,134,26,0.2)" stroke-width="1" fill="none"/>
+          <path d="M70 200 Q100 240 130 200" stroke="rgba(200,134,26,0.3)" stroke-width="1" fill="none"/>
+          <line x1="100" y1="200" x2="100" y2="260" stroke="rgba(200,134,26,0.2)" stroke-width="1"/>
+          <ellipse cx="100" cy="262" rx="25" ry="6" stroke="rgba(200,134,26,0.2)" stroke-width="1" fill="none"/>
+        </svg>
+      </div>
+      <div class="tile-overlay"><div class="tile-label">Weddings</div></div>
+    </div>
+    <div class="gallery-tile reveal reveal-delay-1">
+      <div class="tile-bg tile-bg-2" style="background: linear-gradient(135deg, #0A0F1A 0%, #121D30 50%, #0A1220 100%); display: flex; align-items: center; justify-content: center;">
+        <svg width="55%" height="55%" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="tile-pattern">
+          <rect x="40" y="40" width="120" height="120" rx="2" stroke="rgba(200,134,26,0.25)" stroke-width="1" fill="rgba(200,134,26,0.04)"/>
+          <rect x="60" y="60" width="80" height="80" rx="2" stroke="rgba(200,134,26,0.2)" stroke-width="1" fill="none"/>
+          <circle cx="100" cy="100" r="20" stroke="rgba(200,134,26,0.3)" stroke-width="1" fill="rgba(200,134,26,0.06)"/>
+          <line x1="40" y1="100" x2="160" y2="100" stroke="rgba(200,134,26,0.15)" stroke-width="0.5"/>
+          <line x1="100" y1="40" x2="100" y2="160" stroke="rgba(200,134,26,0.15)" stroke-width="0.5"/>
+        </svg>
+      </div>
+      <div class="tile-overlay"><div class="tile-label">Corporate</div></div>
+    </div>
+    <div class="gallery-tile reveal reveal-delay-2">
+      <div class="tile-bg tile-bg-3" style="background: linear-gradient(135deg, #1A0A08 0%, #2E1410 50%, #221008 100%); display: flex; align-items: center; justify-content: center;">
+        <svg width="50%" height="50%" viewBox="0 0 200 200" fill="none" class="tile-pattern">
+          <path d="M60 40 L80 40 L100 80 L120 40 L140 40 L110 100 L110 170 L90 170 L90 100 Z" stroke="rgba(200,134,26,0.3)" fill="rgba(200,134,26,0.06)" stroke-width="1"/>
+          <ellipse cx="100" cy="172" rx="15" ry="4" fill="rgba(200,134,26,0.15)"/>
+        </svg>
+      </div>
+      <div class="tile-overlay"><div class="tile-label">Cocktails</div></div>
+    </div>
+    <div class="gallery-tile reveal">
+      <div class="tile-bg tile-bg-4" style="background: linear-gradient(135deg, #0C1508 0%, #182412 50%, #0E1A0A 100%); display: flex; align-items: center; justify-content: center;">
+        <svg width="65%" height="65%" viewBox="0 0 240 160" fill="none" class="tile-pattern">
+          <rect x="10" y="30" width="220" height="100" rx="2" stroke="rgba(200,134,26,0.2)" stroke-width="1" fill="rgba(200,134,26,0.03)"/>
+          <rect x="30" y="50" width="40" height="60" rx="1" stroke="rgba(200,134,26,0.25)" fill="rgba(200,134,26,0.06)" stroke-width="1"/>
+          <rect x="100" y="50" width="40" height="60" rx="1" stroke="rgba(200,134,26,0.25)" fill="rgba(200,134,26,0.06)" stroke-width="1"/>
+          <rect x="170" y="50" width="40" height="60" rx="1" stroke="rgba(200,134,26,0.25)" fill="rgba(200,134,26,0.06)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="tile-overlay"><div class="tile-label">Garden Parties</div></div>
+    </div>
+    <div class="gallery-tile reveal reveal-delay-1">
+      <div class="tile-bg tile-bg-5" style="background: linear-gradient(135deg, #140E1A 0%, #201525 50%, #180F1E 100%); display: flex; align-items: center; justify-content: center;">
+        <svg width="50%" height="50%" viewBox="0 0 200 200" fill="none" class="tile-pattern">
+          <circle cx="100" cy="100" r="70" stroke="rgba(200,134,26,0.2)" stroke-width="1" fill="none"/>
+          <circle cx="100" cy="100" r="45" stroke="rgba(200,134,26,0.25)" stroke-width="1" fill="rgba(200,134,26,0.04)"/>
+          <circle cx="100" cy="100" r="15" stroke="rgba(200,134,26,0.3)" stroke-width="1" fill="rgba(200,134,26,0.08)"/>
+          <line x1="30" y1="100" x2="170" y2="100" stroke="rgba(200,134,26,0.1)" stroke-width="0.5"/>
+          <line x1="100" y1="30" x2="100" y2="170" stroke="rgba(200,134,26,0.1)" stroke-width="0.5"/>
+        </svg>
+      </div>
+      <div class="tile-overlay"><div class="tile-label">Anniversaries</div></div>
+    </div>
+    <div class="gallery-tile reveal reveal-delay-2">
+      <div class="tile-bg tile-bg-6" style="background: linear-gradient(135deg, #1A1208 0%, #2A1E0A 50%, #1E1608 100%); display: flex; align-items: center; justify-content: center;">
+        <svg width="55%" height="55%" viewBox="0 0 200 200" fill="none" class="tile-pattern">
+          <polygon points="100,20 185,75 185,125 100,180 15,125 15,75" stroke="rgba(200,134,26,0.25)" fill="rgba(200,134,26,0.04)" stroke-width="1"/>
+          <polygon points="100,50 155,82 155,118 100,150 45,118 45,82" stroke="rgba(200,134,26,0.2)" fill="none" stroke-width="1"/>
+          <circle cx="100" cy="100" r="18" stroke="rgba(200,134,26,0.3)" fill="rgba(200,134,26,0.08)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="tile-overlay"><div class="tile-label">Bar Setup</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- COCKTAIL MENU -->
+<section id="menu">
+  <div class="menu-header reveal">
+    <div class="section-label">Signature Drinks</div>
+    <h2 class="section-title">Our <em>cocktail menu</em></h2>
+    <p>Hover or tap a card to reveal the recipe. Every cocktail available for your event.</p>
+  </div>
+  <div class="menu-carousel-wrap reveal">
+    <button class="carousel-btn prev" onclick="scrollCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
+    <div class="menu-carousel" id="menuCarousel">
+
+      <div class="menu-card" onclick="this.classList.toggle('flipped')">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <div class="menu-card-emoji"><i class="fas fa-whiskey-glass"></i></div>
+            <div>
+              <div class="menu-card-category category">Classic</div>
+              <h3>Old Fashioned</h3>
+              <div class="price">€14</div>
+              <div class="flip-hint">Hover to see recipe ↗</div>
+            </div>
+          </div>
+          <div class="menu-card-back">
+            <h3>Old Fashioned</h3>
+            <ul class="ingredients">
+              <li>60ml Bourbon Whiskey</li>
+              <li>1 tsp Demerara Sugar</li>
+              <li>3 dashes Angostura Bitters</li>
+              <li>Orange peel & ice</li>
+            </ul>
+            <p class="desc">Stirred low and slow. Rich, warming, and utterly timeless — the drink that started it all.</p>
+            <div class="flip-hint">← Hover to flip back</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-card" onclick="this.classList.toggle('flipped')">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <div class="menu-card-emoji"><i class="fas fa-lemon"></i></div>
+            <div>
+              <div class="menu-card-category category">Signature</div>
+              <h3>Copper Sour</h3>
+              <div class="price">€13</div>
+              <div class="flip-hint">Hover to see recipe ↗</div>
+            </div>
+          </div>
+          <div class="menu-card-back">
+            <h3>Copper Sour</h3>
+            <ul class="ingredients">
+              <li>50ml Rye Whiskey</li>
+              <li>25ml Lemon Juice</li>
+              <li>15ml Honey Syrup</li>
+              <li>Egg white & bitters foam</li>
+            </ul>
+            <p class="desc">Our house signature. Silky egg-white foam, bright citrus, and a copper-spiced honey warmth.</p>
+            <div class="flip-hint">← Hover to flip back</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-card" onclick="this.classList.toggle('flipped')">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <div class="menu-card-emoji"><i class="fas fa-martini-glass"></i></div>
+            <div>
+              <div class="menu-card-category category">Aperitif</div>
+              <h3>Negroni Rosso</h3>
+              <div class="price">€13</div>
+              <div class="flip-hint">Hover to see recipe ↗</div>
+            </div>
+          </div>
+          <div class="menu-card-back">
+            <h3>Negroni Rosso</h3>
+            <ul class="ingredients">
+              <li>30ml Gin</li>
+              <li>30ml Campari</li>
+              <li>30ml Sweet Vermouth</li>
+              <li>Orange twist garnish</li>
+            </ul>
+            <p class="desc">Equal parts bold. Bitter, sweet, and botanical in perfect equilibrium. Stirred, never shaken.</p>
+            <div class="flip-hint">← Hover to flip back</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-card" onclick="this.classList.toggle('flipped')">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <div class="menu-card-emoji"><i class="fas fa-champagne-glasses"></i></div>
+            <div>
+              <div class="menu-card-category category">Celebration</div>
+              <h3>Elderflower Fizz</h3>
+              <div class="price">€12</div>
+              <div class="flip-hint">Hover to see recipe ↗</div>
+            </div>
+          </div>
+          <div class="menu-card-back">
+            <h3>Elderflower Fizz</h3>
+            <ul class="ingredients">
+              <li>40ml Gin</li>
+              <li>20ml Elderflower Cordial</li>
+              <li>15ml Lime Juice</li>
+              <li>Prosecco top & mint</li>
+            </ul>
+            <p class="desc">Light, floral, and effervescent. The perfect welcome drink for weddings and celebrations.</p>
+            <div class="flip-hint">← Hover to flip back</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-card" onclick="this.classList.toggle('flipped')">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <div class="menu-card-emoji"><i class="fas fa-pepper-hot"></i></div>
+            <div>
+              <div class="menu-card-category category">Smoke & Earth</div>
+              <h3>Mezcal Mule</h3>
+              <div class="price">€15</div>
+              <div class="flip-hint">Hover to see recipe ↗</div>
+            </div>
+          </div>
+          <div class="menu-card-back">
+            <h3>Mezcal Mule</h3>
+            <ul class="ingredients">
+              <li>50ml Mezcal</li>
+              <li>20ml Lime Juice</li>
+              <li>Ginger Beer top</li>
+              <li>Smoked salt rim & jalapeño</li>
+            </ul>
+            <p class="desc">Smoky agave meets fiery ginger. A conversation-starting drink with serious depth of character.</p>
+            <div class="flip-hint">← Hover to flip back</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-card" onclick="this.classList.toggle('flipped')">
+        <div class="menu-card-inner">
+          <div class="menu-card-front">
+            <div class="menu-card-emoji"><i class="fas fa-glass-water-droplet"></i></div>
+            <div>
+              <div class="menu-card-category category">Zero Proof</div>
+              <h3>Sunset Shrub</h3>
+              <div class="price">€9</div>
+              <div class="flip-hint">Hover to see recipe ↗</div>
+            </div>
+          </div>
+          <div class="menu-card-back">
+            <h3>Sunset Shrub</h3>
+            <ul class="ingredients">
+              <li>40ml Blood Orange Shrub</li>
+              <li>20ml Ginger Syrup</li>
+              <li>Sparkling Water</li>
+              <li>Fresh thyme & orange</li>
+            </ul>
+            <p class="desc">Our proudest zero-proof creation. Complex, tangy, and sophisticated — nobody will miss the alcohol.</p>
+            <div class="flip-hint">← Hover to flip back</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <button class="carousel-btn next" onclick="scrollCarousel(1)"><i class="fas fa-chevron-right"></i></button>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="quiz-wrap">
+    <div class="quiz-header reveal">
+      <div class="section-label">Find Your Drink</div>
+      <h2 class="section-title">What cocktail <em>are you?</em></h2>
+      <p>Answer four quick questions and we'll match you to your perfect cocktail from our menu.</p>
+    </div>
+    <div class="quiz-box reveal" id="quizBox">
+      <div class="quiz-progress" id="quizProgress">
+        <div class="quiz-pip active" id="pip0"></div>
+        <div class="quiz-pip" id="pip1"></div>
+        <div class="quiz-pip" id="pip2"></div>
+        <div class="quiz-pip" id="pip3"></div>
+      </div>
+      <div class="quiz-question" id="quizQuestion">Loading...</div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-result" id="quizResult">
+        <span class="quiz-cocktail-emoji" id="resultEmoji"></span>
+        <div class="quiz-cocktail-name" id="resultName"></div>
+        <div class="quiz-cocktail-desc" id="resultDesc"></div>
+        <a href="#booking" class="btn-primary" style="display:inline-block; margin-bottom: 1rem;">Book &amp; request this cocktail</a><br>
+        <button onclick="resetQuiz()" class="btn-outline" style="display:inline-block; margin-top: 0.5rem;">Retake quiz</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking">
+  <div class="booking-wrap">
+    <div class="booking-header reveal">
+      <div class="section-label">Reservations</div>
+      <h2 class="section-title">Book your <em>event</em></h2>
+      <p>Tell us about your event and we'll get back to you within 24 hours with a tailored quote.</p>
+    </div>
+    
+    <!-- AVAILABILITY CALENDAR -->
+    <div class="calendar-wrap reveal" style="margin-bottom: 2.5rem;">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="prevMonth()"><i class="fas fa-chevron-left"></i></button>
+        <h3 id="calMonthLabel"></h3>
+        <button class="cal-nav" onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+      </div>
+      <div class="cal-days-header">
+        <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="legend-dot available"></div> Available</div>
+        <div class="cal-legend-item"><div class="legend-dot booked"></div> Booked</div>
+        <div class="cal-legend-item"><div class="legend-dot today-l"></div> Today</div>
+      </div>
+    </div>
+
+<div class="booking-form reveal">
+      <div id="bookingFormWrap">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fname">Full Name</label>
+            <input type="text" id="fname" placeholder="Jane Smith">
+            <span class="error-msg" id="fname-err">Please enter your name.</span>
+          </div>
+          <div class="form-group">
+            <label for="femail">Email Address</label>
+            <input type="email" id="femail" placeholder="jane@example.com">
+            <span class="error-msg" id="femail-err">Please enter a valid email.</span>
+          </div>
+          <div class="form-group">
+            <label for="fphone">Phone Number</label>
+            <input type="tel" id="fphone" placeholder="+1 (555) 000-0000">
+            <span class="error-msg" id="fphone-err">Please enter your phone number.</span>
+          </div>
+          <div class="form-group">
+            <label for="ftype">Event Type</label>
+            <select id="ftype">
+              <option value="" disabled selected>Select event type</option>
+              <option value="wedding">Wedding</option>
+              <option value="birthday">Birthday Party</option>
+              <option value="corporate">Corporate Event</option>
+              <option value="anniversary">Anniversary</option>
+              <option value="garden">Garden Party</option>
+              <option value="other">Other</option>
+            </select>
+            <span class="error-msg" id="ftype-err">Please select an event type.</span>
+          </div>
+          <div class="form-group">
+            <label for="fdate">Event Date</label>
+            <input type="date" id="fdate">
+            <span class="error-msg" id="fdate-err">Please select a date.</span>
+          </div>
+          <div class="form-group">
+            <label for="fguests">Number of Guests</label>
+            <input type="number" id="fguests" placeholder="e.g. 80" min="1">
+            <span class="error-msg" id="fguests-err">Please enter guest count.</span>
+          </div>
+          <div class="form-group full">
+            <label for="fmsg">Tell us about your event</label>
+            <textarea id="fmsg" placeholder="Venue, vision, any special requests..."></textarea>
+          </div>
+        </div>
+        <div class="form-submit">
+          <button type="button" onclick="submitForm()">
+            <i class="fas fa-paper-plane" style="margin-right: 10px;"></i>Send Enquiry
+          </button>
+        </div>
+      </div>
+      <div class="success-msg" id="successMsg">
+        <div class="success-icon"><i class="fas fa-check"></i></div>
+        <h3>Enquiry Received!</h3>
+        <p>Thank you for reaching out. Our events team will be in touch within 24 hours to discuss your celebration.</p>
+        <a href="#hero" class="btn-outline" style="display: inline-block; margin-top: 2rem;">Back to Top</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="testimonials-header reveal">
+    <div class="section-label">Testimonials</div>
+    <h2 class="section-title">Loved by our <em>guests</em></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal tilt-card"><div class="tilt-shine"></div>
+      <div class="stars">★★★★★</div>
+      <blockquote>"The bar at our wedding was the talk of the night. Every single cocktail was perfect, the team was charming, and the setup looked absolutely stunning. Worth every penny."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">SR</div>
+        <div class="author-info">
+          <strong>Sophie & Rian Davies</strong>
+          <span>Wedding, June 2024</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-1 tilt-card"><div class="tilt-shine"></div>
+      <div class="stars">★★★★★</div>
+      <blockquote>"We booked The Copper Still for our company's annual client dinner. Absolutely flawless. Professional, creative, and the custom cocktail menu with our branding was a brilliant touch."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">MK</div>
+        <div class="author-info">
+          <strong>Marcus Klein</strong>
+          <span>Corporate Event, November 2024</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-2 tilt-card"><div class="tilt-shine"></div>
+      <div class="stars">★★★★★</div>
+      <blockquote>"My 40th birthday party was everything I dreamed of, and the bar was the centrepiece. The signature cocktail they created for me — I still get people asking for the recipe."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">AL</div>
+        <div class="author-info">
+          <strong>Anna Laurens</strong>
+          <span>Birthday Party, March 2025</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo" style="font-size: 1.3rem; display: inline-block; margin-bottom: 0;">The Copper Still</div>
+      <p>Award-winning bar and catering for events that deserve to be remembered. Serving the city and beyond since 2018.</p>
+      <div class="footer-socials">
+        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-tiktok"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Navigate</h4>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="#booking">Book an Event</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#booking">Bar Catering</a></li>
+        <li><a href="#booking">Wedding Bar</a></li>
+        <li><a href="#booking">Corporate Events</a></li>
+        <li><a href="#booking">Private Parties</a></li>
+        <li><a href="#booking">Garden Events</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <div class="contact-item"><i class="fas fa-map-marker-alt"></i><span>42 Distillery Lane,<br>Old Quarter, City</span></div>
+      <div class="contact-item"><i class="fas fa-phone"></i><span>+1 (555) 842-0016</span></div>
+      <div class="contact-item"><i class="fas fa-envelope"></i><span>hello@thecopperstill.com</span></div>
+      <div class="contact-item"><i class="fas fa-clock"></i><span>Mon–Sat: 4pm–2am<br>Events by booking</span></div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 The Copper Still. All rights reserved.</p>
+    <a href="#hero">Back to top <i class="fas fa-arrow-up" style="font-size: 0.7rem;"></i></a>
+  </div>
+</footer>
+
+<script>
+  // LOADER DISMISS
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('hidden');
+    }, 2250);
+  });
+
+  // NAV SCROLL
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // MOBILE MENU
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+
+  // FORM VALIDATION + FORMSPREE SUBMISSION
+  // Replace YOUR_FORM_ID below with the ID from your Formspree dashboard (formspree.io)
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+  async function submitForm() {
+    let valid = true;
+
+    const fields = [
+      { id: 'fname', errId: 'fname-err', check: v => v.trim().length > 1 },
+      { id: 'femail', errId: 'femail-err', check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+      { id: 'fphone', errId: 'fphone-err', check: v => v.trim().length > 5 },
+      { id: 'ftype', errId: 'ftype-err', check: v => v !== '' },
+      { id: 'fdate', errId: 'fdate-err', check: v => v !== '' },
+      { id: 'fguests', errId: 'fguests-err', check: v => parseInt(v) > 0 },
+    ];
+
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      const err = document.getElementById(f.errId);
+      const ok = f.check(el.value);
+      el.classList.toggle('error', !ok);
+      err.classList.toggle('show', !ok);
+      if (!ok) valid = false;
+    });
+
+    if (!valid) return;
+
+    const submitBtn = document.querySelector('.form-submit button');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    const data = {
+      name:    document.getElementById('fname').value,
+      email:   document.getElementById('femail').value,
+      phone:   document.getElementById('fphone').value,
+      type:    document.getElementById('ftype').value,
+      date:    document.getElementById('fdate').value,
+      guests:  document.getElementById('fguests').value,
+      message: document.getElementById('fmsg').value,
+    };
+
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (res.ok) {
+        document.getElementById('bookingFormWrap').style.display = 'none';
+        document.getElementById('successMsg').classList.add('show');
+        document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right: 10px;"></i>Send Enquiry';
+        alert('Something went wrong. Please try again or email us directly.');
+      }
+    } catch {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right: 10px;"></i>Send Enquiry';
+      alert('Network error. Please check your connection and try again.');
+    }
+  }
+
+  // Clear errors on input
+  ['fname','femail','fphone','ftype','fdate','fguests'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      el.classList.remove('error');
+      document.getElementById(id + '-err').classList.remove('show');
+    });
+  });
+
+  // SET MIN DATE
+  const today2 = new Date().toISOString().split('T')[0];
+  document.getElementById('fdate').setAttribute('min', today2);
+
+  // ============ CUSTOM CURSOR ============
+  const dot = document.getElementById('cursor-dot');
+
+  document.addEventListener('mousemove', e => {
+    dot.style.left = e.clientX + 'px';
+    dot.style.top  = e.clientY + 'px';
+  });
+
+  document.querySelectorAll('a, button, .menu-card, .quiz-opt, .cal-day.available, .gallery-tile').forEach(el => {
+    el.addEventListener('mouseenter', () => dot.classList.add('stirring'));
+    el.addEventListener('mouseleave', () => dot.classList.remove('stirring'));
+  });
+
+  // ============ PARTICLES ============
+  const canvas = document.getElementById('particles-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resizeCanvas() {
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  for (let i = 0; i < 70; i++) {
+    particles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 1.8 + 0.3,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: -(Math.random() * 0.4 + 0.1),
+      o: Math.random() * 0.5 + 0.1,
+      life: Math.random()
+    });
+  }
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.life += 0.003;
+      if (p.y < -10 || p.life > 1) {
+        p.x    = Math.random() * W;
+        p.y    = H + 10;
+        p.life = 0;
+      }
+      const alpha = Math.sin(p.life * Math.PI) * p.o;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,134,26,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  // ============ PARALLAX ============
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    const bg = document.querySelector('.parallax-bg');
+    if (bg) bg.style.transform = `translateY(${scrollY * 0.35}px)`;
+  });
+
+  // ============ SPLIT TEXT HERO ============
+  (function splitHero() {
+    const title = document.querySelector('.hero-title');
+    if (!title) return;
+    const html = title.innerHTML;
+    // rebuild char by char
+    let out = '';
+    let delay = 0;
+    let inTag = false;
+    let word = '';
+
+    function flushWord(w) {
+      if (!w) return '';
+      let inner = '';
+      [...w].forEach((ch, i) => {
+        const d = (delay * 0.04).toFixed(2);
+        inner += `<span class="char" style="animation-delay:${d}s">${ch}</span>`;
+        delay++;
+      });
+      return `<span class="word">${inner}</span>`;
+    }
+
+    for (let i = 0; i < html.length; i++) {
+      const ch = html[i];
+      if (ch === '<') { inTag = true; out += flushWord(word); word = ''; out += ch; continue; }
+      if (ch === '>') { inTag = false; out += ch; continue; }
+      if (inTag) { out += ch; continue; }
+      if (ch === ' ') { out += flushWord(word); word = ''; out += ' '; continue; }
+      word += ch;
+    }
+    out += flushWord(word);
+    title.innerHTML = out;
+  })();
+
+  // ============ MAGNETIC BUTTONS ============
+  document.querySelectorAll('.magnetic').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const r   = btn.getBoundingClientRect();
+      const dx  = e.clientX - (r.left + r.width  / 2);
+      const dy  = e.clientY - (r.top  + r.height / 2);
+      btn.style.transform = `translate(${dx * 0.25}px, ${dy * 0.25}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+      btn.style.transition = 'transform 0.5s cubic-bezier(.25,.46,.45,.94)';
+      setTimeout(() => btn.style.transition = '', 500);
+    });
+  });
+
+  // ============ 3D TILT CARDS ============
+  document.querySelectorAll('.tilt-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r  = card.getBoundingClientRect();
+      const x  = e.clientX - r.left;
+      const y  = e.clientY - r.top;
+      const rx = ((y / r.height) - 0.5) * -14;
+      const ry = ((x / r.width)  - 0.5) *  14;
+      card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
+      const shine = card.querySelector('.tilt-shine');
+      if (shine) shine.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.1) 0%, transparent 60%)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+      card.style.transition = 'transform 0.5s ease';
+      setTimeout(() => card.style.transition = '', 500);
+    });
+  });
+
+  // ============ COCKTAIL MENU CAROUSEL ============
+  function scrollCarousel(dir) {
+    const c = document.getElementById('menuCarousel');
+    c.scrollBy({ left: dir * 300, behavior: 'smooth' });
+  }
+
+  // ============ AVAILABILITY CALENDAR ============
+  // Paste your Google Sheet published CSV URL here (File → Share → Publish to web → CSV)
+  const BOOKINGS_SHEET_URL = 'YOUR_GOOGLE_SHEET_CSV_URL';
+
+  let bookedDateSet = new Set();
+
+  async function fetchBookedDates() {
+    if (BOOKINGS_SHEET_URL === 'YOUR_GOOGLE_SHEET_CSV_URL') return;
+    try {
+      const res  = await fetch(BOOKINGS_SHEET_URL);
+      const text = await res.text();
+      // Sheet has a header row "date", then one YYYY-MM-DD date per row
+      text.trim().split('\n').slice(1).forEach(row => {
+        const d = row.trim().replace(/"/g, '');
+        if (d) bookedDateSet.add(d);
+      });
+      renderCalendar();
+    } catch {
+      // Fail silently — calendar just shows all days as available
+    }
+  }
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let calDate = new Date();
+  let calYear = calDate.getFullYear();
+  let calMonth = calDate.getMonth();
+  let selectedCalDay = null;
+
+  function renderCalendar() {
+    const label = document.getElementById('calMonthLabel');
+    const grid  = document.getElementById('calGrid');
+    if (!label || !grid) return;
+    label.textContent = `${monthNames[calMonth]} ${calYear}`;
+    grid.innerHTML = '';
+
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const offset   = (firstDay === 0) ? 6 : firstDay - 1;
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const today = new Date();
+
+    for (let i = 0; i < offset; i++) {
+      const blank = document.createElement('div');
+      blank.className = 'cal-day empty';
+      grid.appendChild(blank);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const el      = document.createElement('div');
+      const date    = new Date(calYear, calMonth, d);
+      const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const isToday   = date.toDateString() === today.toDateString();
+      const isPast    = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const isBooked  = bookedDateSet.has(dateStr);
+      const isSelected = selectedCalDay === dateStr;
+
+      el.textContent = d;
+      if (isPast)       el.className = 'cal-day past';
+      else if (isBooked) el.className = 'cal-day booked';
+      else              el.className = 'cal-day available';
+      if (isToday)      el.classList.add('today');
+      if (isSelected)   el.classList.add('selected');
+
+      if (!isPast && !isBooked) {
+        el.addEventListener('click', () => {
+          selectedCalDay = dateStr;
+          const fdate = document.getElementById('fdate');
+          if (fdate) { fdate.value = dateStr; fdate.dispatchEvent(new Event('input')); }
+          renderCalendar();
+          document.getElementById('booking').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      }
+      grid.appendChild(el);
+    }
+  }
+
+  function prevMonth() {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  }
+  function nextMonth() {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  }
+
+  renderCalendar();
+  fetchBookedDates();
+
+  // ============ COCKTAIL QUIZ ============
+  const quizData = [
+    {
+      q: "What's your ideal Friday night?",
+      opts: ["Cosy bar, close friends", "Big night out dancing", "Rooftop with a view", "Quiet dinner at home"]
+    },
+    {
+      q: "Pick a flavour profile:",
+      opts: ["Bold & smoky", "Light & floral", "Sharp & citrusy", "Sweet & indulgent"]
+    },
+    {
+      q: "Your event vibe is:",
+      opts: ["Intimate & romantic", "Lively & energetic", "Chic & sophisticated", "Fun & playful"]
+    },
+    {
+      q: "You prefer drinks that are:",
+      opts: ["Stirred & spirit-forward", "Shaken & refreshing", "Bubbly & light", "Creative & surprising"]
+    }
+  ];
+
+  const quizResults = [
+    { name: "Old Fashioned", icon: "fa-whiskey-glass", desc: "Classic, bold, and timeless. You know what you want and you don't apologise for it. A spirit-forward sip for someone with serious taste." },
+    { name: "Mezcal Mule",   icon: "fa-pepper-hot", desc: "Smoky, fiery, and full of personality. You light up a room and you're not afraid to be different. This one turns heads." },
+    { name: "Copper Sour",   icon: "fa-lemon", desc: "Our house signature — bright, silky, and a little bit unexpected. You're the life of the party but you've got depth." },
+    { name: "Elderflower Fizz", icon: "fa-champagne-glasses", desc: "Light, elegant, and celebratory. You appreciate the finer things and you make every occasion feel like a special one." },
+    { name: "Negroni Rosso", icon: "fa-martini-glass", desc: "Complex, refined, and not for the faint of heart. You have impeccable taste and a confidence that is genuinely magnetic." },
+    { name: "Sunset Shrub",  icon: "fa-glass-water-droplet", desc: "Creative, sophisticated, and proof that you don't need alcohol to make an impression. Fresh thinking in a glass." },
+  ];
+
+  let quizStep = 0;
+  let quizAnswers = [];
+
+  function renderQuiz() {
+    const qEl   = document.getElementById('quizQuestion');
+    const optsEl = document.getElementById('quizOptions');
+    const result = document.getElementById('quizResult');
+    if (!qEl) return;
+
+    result.classList.remove('show');
+    qEl.style.opacity = '0';
+    setTimeout(() => {
+      qEl.textContent = quizData[quizStep].q;
+      qEl.style.opacity = '1';
+      qEl.style.transition = 'opacity 0.4s';
+    }, 150);
+
+    optsEl.innerHTML = '';
+    quizData[quizStep].opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.textContent = opt;
+      btn.onclick = () => {
+        quizAnswers[quizStep] = i;
+        quizStep++;
+        updatePips();
+        if (quizStep >= quizData.length) showQuizResult();
+        else renderQuiz();
+      };
+      optsEl.appendChild(btn);
+    });
+  }
+
+  function updatePips() {
+    quizData.forEach((_, i) => {
+      const pip = document.getElementById('pip' + i);
+      if (!pip) return;
+      pip.className = 'quiz-pip' + (i < quizStep ? ' done' : i === quizStep ? ' active' : '');
+    });
+  }
+
+  function showQuizResult() {
+    document.getElementById('quizOptions').innerHTML = '';
+    document.getElementById('quizQuestion').textContent = '';
+    const score = quizAnswers.reduce((a, b) => a + b, 0);
+    const pick  = quizResults[score % quizResults.length];
+    document.getElementById('resultEmoji').innerHTML = `<i class="fas ${pick.icon}"></i>`;
+    document.getElementById('resultName').textContent  = pick.name;
+    document.getElementById('resultDesc').textContent  = pick.desc;
+    document.getElementById('quizResult').classList.add('show');
+  }
+
+  function resetQuiz() {
+    quizStep = 0; quizAnswers = [];
+    updatePips();
+    renderQuiz();
+  }
+
+  renderQuiz();
+
+</script>
+</body>
+</html>

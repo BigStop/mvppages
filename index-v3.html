@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Copper Still — An Evening, Poured</title>
+<link href="https://fonts.googleapis.com/css2?family=Italiana&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0D0A06;
+    --ink: #EFE7D9;
+    --ink-dim: #968A78;
+    --ink-faint: #564E3F;
+    --amber: #D99A45;
+    --amber-deep: #B87333;
+    --amber-glow: #F2BE6B;
+    --hairline: rgba(217, 154, 69, 0.16);
+    --display: 'Italiana', serif;
+    --body: 'Space Grotesk', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  ::selection { background: var(--amber); color: #0D0A06; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0A0805; }
+  ::-webkit-scrollbar-thumb { background: #2C2415; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--amber-deep); }
+
+  body {
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--ink);
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: clip;            /* clip (not hidden) keeps position:sticky alive */
+    transition: background-color 1.4s ease;
+    -webkit-font-smoothing: antialiased;
+    cursor: none;
+  }
+
+  a, button { cursor: none; }
+
+  @media (pointer: coarse), (prefers-reduced-motion: reduce) {
+    body, a, button { cursor: auto; }
+  }
+
+  /* film grain */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9990;
+  }
+
+  /* ============ CURSOR ============ */
+  #cur, #cur-ring {
+    position: fixed;
+    top: 0; left: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9995;
+    transform: translate(-50%, -50%);
+  }
+  #cur {
+    width: 6px; height: 6px;
+    background: var(--amber-glow);
+    box-shadow: 0 0 12px rgba(242,190,107,0.8);
+  }
+  #cur-ring {
+    width: 34px; height: 34px;
+    border: 1px solid rgba(217,154,69,0.45);
+    transition: width 0.3s, height 0.3s, border-color 0.3s;
+  }
+  #cur-ring.hot {
+    width: 56px; height: 56px;
+    border-color: var(--amber-glow);
+  }
+  @media (pointer: coarse), (prefers-reduced-motion: reduce) {
+    #cur, #cur-ring { display: none; }
+  }
+
+  /* ============ FIXED CHROME ============ */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.6rem clamp(1.4rem, 4vw, 3.4rem);
+    transition: background 0.5s, backdrop-filter 0.5s, padding 0.4s, border-color 0.5s;
+    border-bottom: 1px solid transparent;
+  }
+  header.tucked {
+    padding-top: 1rem; padding-bottom: 1rem;
+    background: rgba(10, 8, 5, 0.78);
+    backdrop-filter: blur(14px);
+    border-bottom-color: var(--hairline);
+  }
+
+  .brand {
+    font-family: var(--display);
+    font-size: 1.15rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .top-right { display: flex; align-items: center; gap: 2.2rem; }
+
+  .menu-toggle {
+    background: none; border: none;
+    font-family: var(--body);
+    font-size: 0.62rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .menu-toggle:hover { color: var(--amber-glow); }
+  .menu-toggle .bars { display: inline-flex; flex-direction: column; gap: 5px; }
+  .menu-toggle .bars span { width: 22px; height: 1px; background: currentColor; display: block; }
+
+  .reserve-pill {
+    font-size: 0.62rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    border: 1px solid var(--amber-deep);
+    padding: 0.7rem 1.6rem;
+    transition: background 0.35s, color 0.35s;
+    white-space: nowrap;
+  }
+  .reserve-pill:hover { background: var(--amber); color: #0D0A06; }
+
+  /* overlay nav */
+  #overlay {
+    position: fixed; inset: 0;
+    background: rgba(8, 6, 3, 0.97);
+    z-index: 950;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.4rem;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+  #overlay.open { opacity: 1; visibility: visible; }
+  #overlay a {
+    font-family: var(--display);
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    color: var(--ink);
+    text-decoration: none;
+    line-height: 1.2;
+    display: flex;
+    align-items: baseline;
+    gap: 1.4rem;
+    transition: color 0.3s;
+  }
+  #overlay a:hover { color: var(--amber-glow); }
+  #overlay a small {
+    font-family: var(--body);
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--ink-faint);
+  }
+  #overlay .close-x {
+    position: absolute;
+    top: 1.8rem; right: clamp(1.4rem, 4vw, 3.4rem);
+    background: none; border: none;
+    color: var(--ink-dim);
+    font-size: 0.62rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+  }
+
+  /* clock — bottom left */
+  #clockbox {
+    position: fixed;
+    left: clamp(1.4rem, 4vw, 3.4rem);
+    bottom: 2.2rem;
+    z-index: 920;
+    pointer-events: none;
+    line-height: 1;
+  }
+  #clockbox .t {
+    font-family: var(--display);
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    color: var(--ink);
+    letter-spacing: 0.06em;
+    text-shadow: 0 2px 18px rgba(0,0,0,0.7);
+  }
+  #clockbox .scene-name {
+    margin-top: 0.5rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.44em;
+    text-transform: uppercase;
+    color: var(--amber);
+    text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+  }
+
+  /* glass meter — bottom right */
+  #glassmeter {
+    position: fixed;
+    right: clamp(1.4rem, 4vw, 3.4rem);
+    bottom: 2.2rem;
+    z-index: 920;
+    pointer-events: none;
+    text-align: right;
+    font-size: 0.58rem;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+  }
+  #glassmeter b { color: var(--amber-glow); font-weight: 500; }
+
+  @media (max-width: 700px) {
+    #clockbox .t { font-size: 1.8rem; }
+    #clockbox, #glassmeter { bottom: 1.2rem; }
+  }
+
+  /* liquid canvas */
+  #liquid {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    width: 100%;
+    height: 150px;
+    z-index: 910;
+    pointer-events: none;
+  }
+
+  /* ============ SCENES ============ */
+  .scene { position: relative; }
+
+  .scene-pad { padding: clamp(7rem, 14vh, 11rem) clamp(1.4rem, 5vw, 4rem); }
+
+  .frame { max-width: 1220px; margin: 0 auto; }
+
+  .scene-tag {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.46em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 2.6rem;
+  }
+  .scene-tag::after { content: ''; width: 64px; height: 1px; background: var(--amber-deep); opacity: 0.6; }
+
+  h1, h2 { font-family: var(--display); font-weight: 400; }
+
+  /* char reveal */
+  .chars .w { display: inline-block; white-space: nowrap; }
+  .chars .c {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(55%) rotate(3deg);
+    transition: opacity 0.7s cubic-bezier(.16,1,.3,1), transform 0.7s cubic-bezier(.16,1,.3,1);
+  }
+  .chars.in .c { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chars .c { transition: none; opacity: 1; transform: none; }
+  }
+
+  .fade {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1s cubic-bezier(.16,1,.3,1), transform 1s cubic-bezier(.16,1,.3,1);
+  }
+  .fade.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .fade { transition: none; opacity: 1; transform: none; }
+  }
+
+  /* ---- opening ---- */
+  #opening {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem clamp(1.4rem, 5vw, 4rem) 11rem;
+    overflow: hidden;
+  }
+
+  #embers {
+    position: absolute; inset: 0;
+    pointer-events: none;
+  }
+
+  .open-kicker {
+    font-size: 0.62rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadein 1.4s ease 0.3s forwards;
+  }
+  .open-kicker b { color: var(--amber); font-weight: 400; }
+
+  @keyframes fadein { to { opacity: 1; } }
+
+  #opening h1 {
+    font-size: clamp(4rem, 14vw, 12.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    position: relative;
+    z-index: 2;
+  }
+  #opening h1 em {
+    font-style: normal;
+    color: var(--amber-glow);
+  }
+
+  .open-sub {
+    margin-top: 3.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadein 1.4s ease 2.1s forwards;
+    position: relative;
+    z-index: 2;
+  }
+  .open-sub p { max-width: 38ch; color: var(--ink-dim); font-size: 0.92rem; }
+
+  .scroll-cue {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .scroll-cue .stem {
+    width: 1px; height: 48px;
+    background: linear-gradient(180deg, var(--amber), transparent);
+    animation: stem 2s ease-in-out infinite;
+  }
+  @keyframes stem {
+    0%, 100% { transform: scaleY(1); opacity: 1; }
+    50% { transform: scaleY(0.55); opacity: 0.4; }
+  }
+
+  /* ---- setup (about) ---- */
+  .setup-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: clamp(3rem, 8vw, 7rem);
+    align-items: start;
+  }
+
+  .setup-lede {
+    font-family: var(--display);
+    font-size: clamp(1.7rem, 3.4vw, 2.7rem);
+    line-height: 1.3;
+  }
+  .setup-lede em { font-style: normal; color: var(--amber-glow); }
+
+  .setup-body { margin-top: 2rem; color: var(--ink-dim); font-size: 0.93rem; max-width: 54ch; }
+  .setup-body + .setup-body { margin-top: 1.1rem; }
+
+  .setup-aside { border-left: 1px solid var(--hairline); padding-left: clamp(1.5rem, 3vw, 2.8rem); }
+  .setup-aside .row { padding: 1.4rem 0; border-bottom: 1px solid var(--hairline); }
+  .setup-aside .row:first-child { padding-top: 0.4rem; }
+  .setup-aside .k {
+    font-size: 0.58rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.4rem;
+  }
+  .setup-aside .v { font-family: var(--display); font-size: 1.35rem; color: var(--ink); }
+  .setup-aside .v i { font-style: normal; color: var(--amber); }
+
+  /* ---- pour (horizontal menu) ---- */
+  #pour { /* height set by JS to create scroll runway */ }
+
+  .pour-pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .pour-head {
+    padding: 0 clamp(1.4rem, 5vw, 4rem);
+    margin-bottom: 3.4rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .pour-head h2 { font-size: clamp(2.4rem, 6vw, 4.6rem); line-height: 1; }
+  .pour-head h2 em { font-style: normal; color: var(--amber-glow); }
+  .pour-hint {
+    font-size: 0.6rem;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .pour-track {
+    display: flex;
+    gap: clamp(1.2rem, 2.5vw, 2.4rem);
+    padding: 0 clamp(1.4rem, 5vw, 4rem);
+    will-change: transform;
+    width: max-content;
+  }
+
+  .pour-card {
+    width: clamp(300px, 78vw, 430px);
+    flex-shrink: 0;
+    border: 1px solid var(--hairline);
+    padding: clamp(1.8rem, 3vw, 2.8rem);
+    background: rgba(13, 10, 6, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    min-height: 380px;
+    transition: border-color 0.4s, transform 0.4s;
+  }
+  .pour-card:hover { border-color: var(--amber-deep); transform: translateY(-6px); }
+
+  .pour-card .no {
+    font-size: 0.6rem;
+    letter-spacing: 0.42em;
+    color: var(--ink-faint);
+  }
+  .pour-card h3 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(2rem, 4vw, 2.9rem);
+    line-height: 1.05;
+  }
+  .pour-card .spec {
+    color: var(--ink-dim);
+    font-size: 0.86rem;
+    border-top: 1px solid var(--hairline);
+    padding-top: 1.2rem;
+    flex: 1;
+  }
+  .pour-card .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .pour-card .tag {
+    font-size: 0.58rem;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+  .pour-card .price { font-family: var(--display); font-size: 1.6rem; color: var(--amber-glow); }
+
+  .pour-card.coda {
+    justify-content: center;
+    align-items: flex-start;
+    border-style: dashed;
+    background: transparent;
+  }
+  .pour-card.coda p { font-family: var(--display); font-size: 1.9rem; line-height: 1.3; }
+  .pour-card.coda a {
+    margin-top: 1.6rem;
+    color: var(--amber-glow);
+    text-decoration: none;
+    font-size: 0.62rem;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--amber-deep);
+    padding-bottom: 0.5rem;
+  }
+
+  .pour-bar {
+    margin: 3.2rem clamp(1.4rem, 5vw, 4rem) 0;
+    height: 1px;
+    background: var(--hairline);
+    position: relative;
+  }
+  .pour-bar i {
+    position: absolute;
+    left: 0; top: -1px;
+    height: 3px;
+    width: 0%;
+    background: var(--amber);
+    box-shadow: 0 0 10px rgba(217,154,69,0.7);
+  }
+
+  /* ---- toast ---- */
+  #toast { text-align: center; }
+  #toast .frame { max-width: 980px; }
+
+  .toast-quote {
+    font-family: var(--display);
+    font-size: clamp(1.9rem, 4.6vw, 3.6rem);
+    line-height: 1.3;
+  }
+  .toast-quote em { font-style: normal; color: var(--amber-glow); }
+
+  .toast-who {
+    margin-top: 2.6rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.44em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .toast-others {
+    margin-top: 5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    text-align: left;
+  }
+  .toast-mini {
+    border-top: 1px solid var(--hairline);
+    padding-top: 1.4rem;
+    color: var(--ink-dim);
+    font-size: 0.88rem;
+  }
+  .toast-mini b {
+    display: block;
+    font-weight: 400;
+    font-size: 0.58rem;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-top: 1rem;
+  }
+
+  /* ---- peak (stats) ---- */
+  .peak-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    text-align: center;
+  }
+  .peak-cell .big {
+    font-family: var(--display);
+    font-size: clamp(3.6rem, 9vw, 7.5rem);
+    line-height: 1;
+    color: var(--ink);
+  }
+  .peak-cell .big i { font-style: normal; color: var(--amber-glow); font-size: 0.5em; vertical-align: super; }
+  .peak-cell .lbl {
+    margin-top: 1rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  /* ---- last call (booking) ---- */
+  .call-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(3rem, 8vw, 7rem);
+    align-items: start;
+  }
+
+  .call-pitch {
+    font-family: var(--display);
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    line-height: 1.35;
+  }
+  .call-pitch em { font-style: normal; color: var(--amber-glow); }
+
+  .call-meta { margin-top: 2.4rem; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; color: var(--ink-dim); }
+  .call-meta span { color: var(--amber); margin-right: 0.7rem; }
+
+  .field { position: relative; margin-bottom: 2.1rem; }
+  .field label {
+    display: block;
+    font-size: 0.56rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 0.3rem;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--ink-faint);
+    color: var(--ink);
+    font-family: var(--body);
+    font-weight: 300;
+    font-size: 1rem;
+    padding: 0.65rem 0;
+    outline: none;
+    border-radius: 0;
+    transition: border-color 0.3s;
+    -webkit-appearance: none;
+  }
+  .field select option { background: #14100A; }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-bottom-color: var(--amber-glow); }
+  .field .err {
+    position: absolute;
+    bottom: -1.2rem; left: 0;
+    font-size: 0.72rem;
+    color: #C06A50;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .field.bad .err { opacity: 1; }
+  .field.bad input, .field.bad select { border-bottom-color: #8A4636; }
+
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+  .call-btn {
+    background: none;
+    border: 1px solid var(--amber-deep);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 0.64rem;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    padding: 1.15rem 3rem;
+    transition: background 0.35s, color 0.35s;
+  }
+  .call-btn:hover:not(:disabled) { background: var(--amber); color: #0D0A06; }
+  .call-btn:disabled { opacity: 0.5; }
+
+  .call-done { display: none; }
+  .call-done.show { display: block; }
+  .call-done h3 { font-family: var(--display); font-size: 2.2rem; color: var(--amber-glow); margin-bottom: 0.8rem; }
+  .call-done p { color: var(--ink-dim); max-width: 44ch; }
+
+  /* ---- footer ---- */
+  footer {
+    border-top: 1px solid var(--hairline);
+    padding: 3.4rem clamp(1.4rem, 5vw, 4rem) 12rem; /* room for the full glass */
+    text-align: center;
+  }
+  footer .sign {
+    font-family: var(--display);
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    color: var(--ink);
+  }
+  footer .sign em { font-style: normal; color: var(--amber-glow); }
+  footer .legal {
+    margin-top: 1.6rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* ---- responsive ---- */
+  @media (max-width: 880px) {
+    .setup-grid, .call-grid { grid-template-columns: 1fr; }
+    .setup-aside { border-left: none; padding-left: 0; border-top: 1px solid var(--hairline); padding-top: 1.5rem; }
+    .peak-row { grid-template-columns: 1fr; gap: 3.5rem; }
+    .toast-others { grid-template-columns: 1fr; }
+    .pair { grid-template-columns: 1fr; gap: 0; }
+    .top-right { gap: 1.2rem; }
+    .reserve-pill { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- cursor -->
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- fixed chrome -->
+<header id="topbar">
+  <a href="#opening" class="brand">The Copper Still</a>
+  <div class="top-right">
+    <a href="#lastcall" class="reserve-pill">Reserve</a>
+    <button class="menu-toggle" onclick="overlay(true)">
+      Menu <span class="bars"><span></span><span></span></span>
+    </button>
+  </div>
+</header>
+
+<div id="overlay">
+  <button class="close-x" onclick="overlay(false)">Close</button>
+  <a href="#opening"  onclick="overlay(false)"><small>18:00</small> The Invitation</a>
+  <a href="#setup"    onclick="overlay(false)"><small>19:00</small> The Set-Up</a>
+  <a href="#pour"     onclick="overlay(false)"><small>20:00</small> First Pour</a>
+  <a href="#toast"    onclick="overlay(false)"><small>22:00</small> The Toast</a>
+  <a href="#peak"     onclick="overlay(false)"><small>00:00</small> The Peak</a>
+  <a href="#lastcall" onclick="overlay(false)"><small>02:00</small> Last Call</a>
+</div>
+
+<div id="clockbox">
+  <div class="t" id="clockT">18:00</div>
+  <div class="scene-name" id="clockScene">The Invitation</div>
+</div>
+
+<div id="glassmeter">Glass <b id="glassPct">0%</b></div>
+
+<canvas id="liquid"></canvas>
+
+<!-- ============ 18:00 OPENING ============ -->
+<section class="scene" id="opening" data-label="The Invitation" data-t0="1080" data-t1="1140" data-bg="#0D0A06">
+  <canvas id="embers"></canvas>
+  <div class="open-kicker"><b>The Copper Still</b> &mdash; Bar &amp; Catering presents</div>
+  <h1 class="chars" data-stagger="34">An Evening, <em>Poured.</em></h1>
+  <div class="open-sub">
+    <p>One night with the city's most quietly famous bar — from the first clink of ice at six, to the last call you'll wish lasted longer. Scroll, and the glass fills.</p>
+    <div class="scroll-cue">The night begins <span class="stem"></span></div>
+  </div>
+</section>
+
+<!-- ============ 19:00 SET-UP ============ -->
+<section class="scene scene-pad" id="setup" data-label="The Set-Up" data-t0="1140" data-t1="1200" data-bg="#0B0A08">
+  <div class="frame">
+    <div class="scene-tag fade">19:00 &mdash; The Set-Up</div>
+    <div class="setup-grid">
+      <div>
+        <p class="setup-lede chars" data-stagger="14">We arrive before anyone notices, and leave after everyone remembers. <em>That is the whole trick.</em></p>
+        <p class="setup-body fade">Since 2018, The Copper Still has built bars inside ballrooms, gardens, lofts, and one memorable greenhouse. Staff, spirits, glassware, ice carved that morning — all of it travels with us.</p>
+        <p class="setup-body fade">Our mixologists train in the classics and stray from them deliberately. Every menu is written once, for one event, and retired the morning after.</p>
+      </div>
+      <div class="setup-aside fade">
+        <div class="row">
+          <div class="k">Founded</div>
+          <div class="v">2018 — <i>Old Quarter</i></div>
+        </div>
+        <div class="row">
+          <div class="k">Range</div>
+          <div class="v">The city &amp; <i>well beyond</i></div>
+        </div>
+        <div class="row">
+          <div class="k">Specialty</div>
+          <div class="v">Evenings that <i>run long</i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 20:00 FIRST POUR (horizontal) ============ -->
+<section class="scene" id="pour" data-label="First Pour" data-t0="1200" data-t1="1320" data-bg="#0A080D">
+  <div class="pour-pin">
+    <div class="pour-head">
+      <h2 class="chars" data-stagger="22">First <em>Pour</em></h2>
+      <div class="pour-hint">20:00 &mdash; keep scrolling, the list moves</div>
+    </div>
+    <div class="pour-track" id="pourTrack">
+      <div class="pour-card">
+        <div class="no">No. 01 — Spirit Forward</div>
+        <h3>Old Fashioned</h3>
+        <div class="spec">Bourbon, demerara, angostura, orange oil. Stirred low and slow over a single carved cube.</div>
+        <div class="foot"><span class="tag">The Classic</span><span class="price">14</span></div>
+      </div>
+      <div class="pour-card">
+        <div class="no">No. 02 — House Signature</div>
+        <h3>Copper Sour</h3>
+        <div class="spec">Rye, lemon, honey, silked egg white. Bright citrus over copper-spiced warmth — ours, and only ours.</div>
+        <div class="foot"><span class="tag">Signature</span><span class="price">13</span></div>
+      </div>
+      <div class="pour-card">
+        <div class="no">No. 03 — Aperitivo</div>
+        <h3>Negroni Rosso</h3>
+        <div class="spec">Gin, Campari, sweet vermouth in perfect thirds. Bitter, botanical, stirred — never shaken.</div>
+        <div class="foot"><span class="tag">Aperitif</span><span class="price">13</span></div>
+      </div>
+      <div class="pour-card">
+        <div class="no">No. 04 — For the Toast</div>
+        <h3>Elderflower Fizz</h3>
+        <div class="spec">Gin, elderflower, lime, prosecco, mint. The welcome drink that starts every wedding we pour.</div>
+        <div class="foot"><span class="tag">Celebration</span><span class="price">12</span></div>
+      </div>
+      <div class="pour-card">
+        <div class="no">No. 05 — Smoke &amp; Fire</div>
+        <h3>Mezcal Mule</h3>
+        <div class="spec">Mezcal, lime, ginger beer, smoked salt, jalape&ntilde;o. The one your guests will still be discussing at brunch.</div>
+        <div class="foot"><span class="tag">Smoke &amp; Earth</span><span class="price">15</span></div>
+      </div>
+      <div class="pour-card">
+        <div class="no">No. 06 — Zero Proof</div>
+        <h3>Sunset Shrub</h3>
+        <div class="spec">Blood-orange shrub, ginger, thyme, sparkling water. Proof that proof is optional.</div>
+        <div class="foot"><span class="tag">Zero Proof</span><span class="price">9</span></div>
+      </div>
+      <div class="pour-card coda">
+        <p>The full list is written fresh, <em style="font-style:normal;color:var(--amber-glow)">for your event alone.</em></p>
+        <a href="#lastcall">Request your menu</a>
+      </div>
+    </div>
+    <div class="pour-bar"><i id="pourProgress"></i></div>
+  </div>
+</section>
+
+<!-- ============ 22:00 TOAST ============ -->
+<section class="scene scene-pad" id="toast" data-label="The Toast" data-t0="1320" data-t1="1410" data-bg="#06070D">
+  <div class="frame">
+    <div class="scene-tag fade" style="justify-content:center;">22:00 &mdash; The Toast</div>
+    <p class="toast-quote chars" data-stagger="8">&ldquo;The bar was the talk of the night. <em>Worth every penny.</em>&rdquo;</p>
+    <div class="toast-who fade">Sophie &amp; Rian &mdash; Wedding, June 2024</div>
+    <div class="toast-others">
+      <div class="toast-mini fade">
+        &ldquo;Flawless. The custom menu with our branding was a brilliant touch — our clients still mention it.&rdquo;
+        <b>Marcus Klein &mdash; Corporate, Nov 2024</b>
+      </div>
+      <div class="toast-mini fade">
+        &ldquo;People still ask me for the recipe of my birthday cocktail. I'm keeping it a secret.&rdquo;
+        <b>Anna Laurens &mdash; Private Party, Mar 2025</b>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 00:00 PEAK ============ -->
+<section class="scene scene-pad" id="peak" data-label="The Peak" data-t0="1410" data-t1="1485" data-bg="#04050B">
+  <div class="frame">
+    <div class="scene-tag fade" style="justify-content:center;">00:00 &mdash; The Peak</div>
+    <div class="peak-row">
+      <div class="peak-cell fade">
+        <div class="big"><span data-count="7">0</span><i>yrs</i></div>
+        <div class="lbl">Behind the bar</div>
+      </div>
+      <div class="peak-cell fade">
+        <div class="big"><span data-count="600">0</span><i>+</i></div>
+        <div class="lbl">Events poured</div>
+      </div>
+      <div class="peak-cell fade">
+        <div class="big"><span data-count="4200">0</span><i>+</i></div>
+        <div class="lbl">Cocktails this year</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02:00 LAST CALL ============ -->
+<section class="scene scene-pad" id="lastcall" data-label="Last Call" data-t0="1485" data-t1="1560" data-bg="#0C0705">
+  <div class="frame">
+    <div class="scene-tag fade">02:00 &mdash; Last Call</div>
+    <div class="call-grid">
+      <div class="fade">
+        <p class="call-pitch">The night ends. <em>Yours doesn't have to.</em> Tell us the date — we'll bring the bar.</p>
+        <div class="call-meta">
+          <div><span>&mdash;</span>hello@thecopperstill.com</div>
+          <div><span>&mdash;</span>+1 (555) 842-0016</div>
+          <div><span>&mdash;</span>42 Distillery Lane, Old Quarter</div>
+        </div>
+      </div>
+      <div class="fade">
+        <form id="callForm" novalidate>
+          <div class="pair">
+            <div class="field" data-f="name">
+              <label for="cname">Name</label>
+              <input type="text" id="cname" autocomplete="name">
+              <span class="err">Your name, please</span>
+            </div>
+            <div class="field" data-f="email">
+              <label for="cemail">Email</label>
+              <input type="email" id="cemail" autocomplete="email">
+              <span class="err">A valid email, please</span>
+            </div>
+          </div>
+          <div class="pair">
+            <div class="field" data-f="date">
+              <label for="cdate">Date</label>
+              <input type="date" id="cdate">
+              <span class="err">Choose a date</span>
+            </div>
+            <div class="field" data-f="guests">
+              <label for="cguests">Guests</label>
+              <input type="number" id="cguests" min="1" placeholder="80">
+              <span class="err">How many?</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="cnotes">The occasion</label>
+            <textarea id="cnotes" placeholder="Wedding, launch, a very good excuse…"></textarea>
+          </div>
+          <button type="submit" class="call-btn" id="callBtn">Send Enquiry</button>
+        </form>
+        <div class="call-done" id="callDone">
+          <h3>Received, with thanks.</h3>
+          <p>Our events team replies within twenty-four hours — usually with a first draft of your menu attached.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="sign">Until next time. <em>Cheers.</em></div>
+  <div class="legal">&copy; 2026 The Copper Still &mdash; All rights reserved</div>
+</footer>
+
+<script>
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TOUCH = matchMedia('(pointer: coarse)').matches;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  // ---------- overlay nav ----------
+  window.overlay = open => document.getElementById('overlay').classList.toggle('open', open);
+
+  // ---------- header tuck ----------
+  const topbar = document.getElementById('topbar');
+
+  // ---------- char splitting ----------
+  document.querySelectorAll('.chars').forEach(el => {
+    const stagger = parseInt(el.dataset.stagger || 20);
+    let idx = 0;
+    const split = node => {
+      [...node.childNodes].forEach(child => {
+        if (child.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          child.textContent.split(/(\s+)/).forEach(part => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+            const w = document.createElement('span');
+            w.className = 'w';
+            [...part].forEach(ch => {
+              const c = document.createElement('span');
+              c.className = 'c';
+              c.textContent = ch;
+              c.style.transitionDelay = (idx++ * stagger) + 'ms';
+              w.appendChild(c);
+            });
+            frag.appendChild(w);
+          });
+          node.replaceChild(frag, child);
+        } else if (child.nodeType === 1) split(child);
+      });
+    };
+    split(el);
+  });
+
+  // ---------- reveal observer ----------
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.2 });
+  document.querySelectorAll('.chars, .fade').forEach(el => io.observe(el));
+
+  // ---------- count up ----------
+  const cio = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      cio.unobserve(e.target);
+      const el = e.target, target = parseInt(el.dataset.count);
+      if (RM) { el.textContent = target.toLocaleString(); return; }
+      const t0 = performance.now(), dur = 1800;
+      const tick = now => {
+        const p = clamp((now - t0) / dur, 0, 1);
+        const eased = 1 - Math.pow(1 - p, 4);
+        el.textContent = Math.round(target * eased).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
+
+  // ---------- scenes: clock + background ----------
+  const scenes = [...document.querySelectorAll('.scene')];
+  const clockT = document.getElementById('clockT');
+  const clockScene = document.getElementById('clockScene');
+  let currentBg = '';
+
+  const fmt = mins => {
+    const h = Math.floor(mins / 60) % 24;
+    const m = Math.floor(mins % 60);
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  };
+
+  function updateScenes() {
+    const probe = window.scrollY + window.innerHeight * 0.5;
+    let active = scenes[0], t = parseInt(scenes[0].dataset.t0);
+
+    for (const s of scenes) {
+      const top = s.offsetTop, h = s.offsetHeight;
+      if (probe >= top) {
+        active = s;
+        const p = clamp((probe - top) / h, 0, 1);
+        t = parseInt(s.dataset.t0) + (parseInt(s.dataset.t1) - parseInt(s.dataset.t0)) * p;
+      }
+    }
+
+    clockT.textContent = fmt(t);
+    clockScene.textContent = active.dataset.label;
+    if (active.dataset.bg !== currentBg) {
+      currentBg = active.dataset.bg;
+      document.body.style.backgroundColor = currentBg;
+    }
+  }
+
+  // ---------- horizontal pour ----------
+  const pour = document.getElementById('pour');
+  const pourTrack = document.getElementById('pourTrack');
+  const pourProgress = document.getElementById('pourProgress');
+
+  function sizePour() {
+    const runway = Math.max(0, pourTrack.scrollWidth - window.innerWidth);
+    pour.style.height = (window.innerHeight + runway) + 'px';
+  }
+  sizePour();
+  addEventListener('resize', sizePour);
+
+  function updatePour() {
+    const r = pour.getBoundingClientRect();
+    const runway = pour.offsetHeight - window.innerHeight;
+    if (runway <= 0) return;
+    const x = clamp(-r.top, 0, runway);
+    pourTrack.style.transform = `translateX(${-x}px)`;
+    pourProgress.style.width = (x / runway * 100) + '%';
+  }
+
+  // ---------- glass meter ----------
+  const glassPct = document.getElementById('glassPct');
+  let fillLevel = 0; // 0..1, shared with liquid canvas
+
+  function updateGlass() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    fillLevel = max > 0 ? clamp(window.scrollY / max, 0, 1) : 0;
+    glassPct.textContent = fillLevel > 0.985 ? 'Cheers.' : Math.round(fillLevel * 100) + '%';
+  }
+
+  // ---------- master scroll handler ----------
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      topbar.classList.toggle('tucked', window.scrollY > 40);
+      updateScenes();
+      updatePour();
+      updateGlass();
+      ticking = false;
+    });
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // ---------- liquid canvas ----------
+  const lq = document.getElementById('liquid');
+  const lctx = lq.getContext('2d');
+  let LW, LH;
+
+  function sizeLiquid() {
+    LW = lq.width = lq.offsetWidth * devicePixelRatio;
+    LH = lq.height = lq.offsetHeight * devicePixelRatio;
+  }
+  sizeLiquid();
+  addEventListener('resize', sizeLiquid);
+
+  const lqBubbles = Array.from({ length: 14 }, () => ({
+    x: Math.random(), y: Math.random(), r: Math.random() * 2.2 + 0.8,
+    s: Math.random() * 0.35 + 0.15
+  }));
+
+  function drawLiquid(now) {
+    lctx.clearRect(0, 0, LW, LH);
+    const t = now / 1000;
+    const base = 6 * devicePixelRatio;
+    const level = base + fillLevel * (LH - base - 14 * devicePixelRatio);
+
+    const wave = (amp, len, speed, alpha) => {
+      lctx.beginPath();
+      lctx.moveTo(0, LH);
+      for (let x = 0; x <= LW; x += 6) {
+        const y = LH - level
+          + Math.sin(x / len + t * speed) * amp * devicePixelRatio
+          + Math.sin(x / (len * 0.55) - t * speed * 1.4) * amp * 0.4 * devicePixelRatio;
+        lctx.lineTo(x, y);
+      }
+      lctx.lineTo(LW, LH);
+      lctx.closePath();
+      const g = lctx.createLinearGradient(0, LH - level - 20, 0, LH);
+      g.addColorStop(0, `rgba(242, 190, 107, ${alpha * 1.15})`);
+      g.addColorStop(0.25, `rgba(217, 154, 69, ${alpha})`);
+      g.addColorStop(1, `rgba(140, 85, 30, ${alpha * 0.75})`);
+      lctx.fillStyle = g;
+      lctx.fill();
+    };
+
+    wave(5, 90, RM ? 0 : 0.7, 0.16);
+    wave(7, 140, RM ? 0 : 1.1, 0.30);
+
+    // bubbles inside the liquid
+    if (!RM && level > 22 * devicePixelRatio) {
+      lqBubbles.forEach(b => {
+        b.y -= b.s / 100;
+        if (b.y < 0) { b.y = 1; b.x = Math.random(); }
+        const by = LH - b.y * (level * 0.85);
+        const bx = b.x * LW;
+        lctx.beginPath();
+        lctx.arc(bx, by, b.r * devicePixelRatio, 0, Math.PI * 2);
+        lctx.fillStyle = 'rgba(242, 190, 107, 0.28)';
+        lctx.fill();
+      });
+    }
+
+    requestAnimationFrame(drawLiquid);
+  }
+  requestAnimationFrame(drawLiquid);
+
+  // ---------- embers (hero only) ----------
+  const em = document.getElementById('embers');
+  const ectx = em.getContext('2d');
+  let EW, EH;
+
+  function sizeEmbers() {
+    EW = em.width = em.offsetWidth;
+    EH = em.height = em.offsetHeight;
+  }
+  sizeEmbers();
+  addEventListener('resize', sizeEmbers);
+
+  const embers = Array.from({ length: 42 }, () => ({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 1.6 + 0.4,
+    vx: (Math.random() - 0.5) * 0.12,
+    vy: -(Math.random() * 0.25 + 0.06),
+    tw: Math.random() * Math.PI * 2,
+    o: Math.random() * 0.5 + 0.15
+  }));
+
+  function drawEmbers() {
+    if (RM) return;
+    ectx.clearRect(0, 0, EW, EH);
+    // only animate while hero is on screen
+    if (em.getBoundingClientRect().bottom > 0) {
+      embers.forEach(p => {
+        p.x += p.vx / EW * 60; p.y += p.vy / EH * 60; p.tw += 0.04;
+        if (p.y < -0.02) { p.y = 1.02; p.x = Math.random(); }
+        const flicker = (Math.sin(p.tw) * 0.5 + 0.5);
+        ectx.beginPath();
+        ectx.arc(p.x * EW, p.y * EH, p.r, 0, Math.PI * 2);
+        ectx.fillStyle = `rgba(242, 190, 107, ${p.o * flicker})`;
+        ectx.fill();
+      });
+    }
+    requestAnimationFrame(drawEmbers);
+  }
+  requestAnimationFrame(drawEmbers);
+
+  // ---------- cursor ----------
+  if (!TOUCH && !RM) {
+    const cur = document.getElementById('cur');
+    const ring = document.getElementById('cur-ring');
+    let mx = -100, my = -100, rx = -100, ry = -100;
+
+    addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+    (function follow() {
+      rx += (mx - rx) * 0.16;
+      ry += (my - ry) * 0.16;
+      cur.style.transform  = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
+      ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+      requestAnimationFrame(follow);
+    })();
+
+    document.querySelectorAll('a, button, .pour-card, input, select, textarea').forEach(el => {
+      el.addEventListener('mouseenter', () => ring.classList.add('hot'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('hot'));
+    });
+  }
+
+  // ---------- booking form ----------
+  // Replace YOUR_FORM_ID with your Formspree form id (formspree.io)
+  const FORM_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+  const checks = {
+    name:   v => v.trim().length > 1,
+    email:  v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+    date:   v => v !== '',
+    guests: v => parseInt(v) > 0,
+  };
+  const ids = { name: 'cname', email: 'cemail', date: 'cdate', guests: 'cguests' };
+
+  document.getElementById('cdate').min = new Date().toISOString().split('T')[0];
+
+  Object.entries(ids).forEach(([key, id]) => {
+    document.getElementById(id).addEventListener('input', () => {
+      document.querySelector(`.field[data-f="${key}"]`).classList.remove('bad');
+    });
+  });
+
+  document.getElementById('callForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    let ok = true;
+    Object.entries(ids).forEach(([key, id]) => {
+      const good = checks[key](document.getElementById(id).value);
+      document.querySelector(`.field[data-f="${key}"]`).classList.toggle('bad', !good);
+      if (!good) ok = false;
+    });
+    if (!ok) return;
+
+    const btn = document.getElementById('callBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          name:   document.getElementById('cname').value,
+          email:  document.getElementById('cemail').value,
+          date:   document.getElementById('cdate').value,
+          guests: document.getElementById('cguests').value,
+          notes:  document.getElementById('cnotes').value,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      document.getElementById('callForm').style.display = 'none';
+      document.getElementById('callDone').classList.add('show');
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Send Enquiry';
+      alert('Something went wrong — please email hello@thecopperstill.com directly.');
+    }
+  });
+})();
+</script>
+</body>
+</html>

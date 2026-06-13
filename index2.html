@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Copper Still — After Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --ink: #0A0A0C;
+    --ink-2: #0F0F13;
+    --panel: #131217;
+    --bone: #ECE5D8;
+    --mute: #8E8779;
+    --dim: #55503F;
+    --brass: #D4B36A;
+    --brass-bright: #EBD49A;
+    --brass-deep: #9A7F45;
+    --velvet: #0F2A21;
+    --wine: #1D0F13;
+    --line: rgba(212, 179, 106, 0.16);
+    --line-soft: rgba(212, 179, 106, 0.08);
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Instrument Sans', sans-serif;
+    --mono: 'Space Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    font-weight: 400;
+    background: var(--ink);
+    color: var(--bone);
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--brass); color: var(--ink); }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9000;
+  }
+
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    width: 0;
+    background: linear-gradient(90deg, var(--brass-deep), var(--brass-bright));
+    z-index: 9500;
+  }
+
+  /* ============ THE DOOR ============ */
+  #door {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    overflow: hidden;
+    background: #050505;
+  }
+
+  #door.gone { visibility: hidden; pointer-events: none; }
+
+  .door-panel {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 50.5%;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(212, 179, 106, 0.05) 0px, rgba(212, 179, 106, 0.05) 1px,
+        transparent 1px, transparent 90px),
+      linear-gradient(180deg, #171109 0%, #0E0A05 100%);
+    transition: transform 1.3s cubic-bezier(.76, 0, .24, 1);
+  }
+
+  .door-panel.left  { left: 0;  border-right: 1px solid rgba(212, 179, 106, 0.35); }
+  .door-panel.right { right: 0; border-left: 1px solid rgba(212, 179, 106, 0.35); }
+
+  #door.open .door-panel.left  { transform: translateX(-101%); }
+  #door.open .door-panel.right { transform: translateX(101%); }
+
+  .door-handle {
+    position: absolute;
+    top: 50%;
+    width: 14px; height: 64px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, var(--brass-bright), var(--brass-deep));
+    box-shadow: 0 0 18px rgba(212, 179, 106, 0.4);
+  }
+
+  .door-panel.left  .door-handle { right: 26px; transform: translateY(-50%); }
+  .door-panel.right .door-handle { left: 26px;  transform: translateY(-50%); }
+
+  .door-center {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    z-index: 5;
+    width: min(560px, 90vw);
+    text-align: center;
+    transition: opacity 0.5s ease;
+  }
+
+  #door.open .door-center { opacity: 0; }
+
+  .peephole {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    border: 3px solid var(--brass-deep);
+    background: #0A0703;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 0 6px rgba(212, 179, 106, 0.08), 0 0 40px rgba(0,0,0,0.8);
+  }
+
+  .peep-light {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255, 222, 150, 0.95), rgba(212, 179, 106, 0.5) 70%);
+    transform: scaleX(0);
+    transition: transform 0.7s cubic-bezier(.76, 0, .24, 1);
+  }
+
+  #door.peek .peep-light { transform: scaleX(1); }
+
+  .peep-slit {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    opacity: 0;
+    transition: opacity 0.4s ease 0.5s;
+  }
+
+  #door.peek .peep-slit { opacity: 1; }
+
+  .peep-eye {
+    width: 14px; height: 20px;
+    border-radius: 50%;
+    background: #14100A;
+    animation: eyeLook 2.4s ease infinite;
+  }
+
+  @keyframes eyeLook {
+    0%, 100% { transform: translateX(0); }
+    30% { transform: translateX(-4px); }
+    60% { transform: translateX(4px); }
+  }
+
+  .door-knock {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--dim);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  #door.knock .door-knock { opacity: 1; }
+
+  .door-whisper {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.4rem, 3.4vw, 2rem);
+    color: var(--brass-bright);
+    min-height: 2.6rem;
+  }
+
+  .door-skip {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--dim);
+    animation: pulseDim 2.4s ease infinite;
+  }
+
+  @keyframes pulseDim {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  #door.shake { animation: doorShake 0.4s ease; }
+
+  @keyframes doorShake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-5px, 2px); }
+    50% { transform: translate(4px, -2px); }
+    75% { transform: translate(-3px, 1px); }
+  }
+
+  /* ============ CURSOR ============ */
+  @media (hover: hover) and (pointer: fine) {
+    * { cursor: none !important; }
+  }
+
+  #cursor-dot {
+    position: fixed; top: 0; left: 0;
+    width: 5px; height: 5px;
+    background: var(--brass-bright);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99000;
+    transform: translate(-50%, -50%);
+  }
+
+  #cursor-ring {
+    position: fixed; top: 0; left: 0;
+    width: 30px; height: 30px;
+    border: 1px solid rgba(212, 179, 106, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 98999;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s cubic-bezier(.25,.46,.45,.94),
+                height 0.3s cubic-bezier(.25,.46,.45,.94),
+                border-color 0.3s, background 0.3s;
+  }
+
+  #cursor-ring.hovering {
+    width: 52px; height: 52px;
+    border-color: var(--brass);
+    background: rgba(212, 179, 106, 0.06);
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    #cursor-dot, #cursor-ring { display: none; }
+  }
+
+  /* ============ NAV ============ */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    height: 76px;
+    padding: 0 4.5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.35s ease;
+    border-bottom: 1px solid transparent;
+  }
+
+  nav.scrolled {
+    height: 62px;
+    background: rgba(10, 10, 12, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom-color: var(--line-soft);
+  }
+
+  .nav-logo {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.35rem;
+    color: var(--bone);
+    text-decoration: none;
+    line-height: 1.05;
+  }
+
+  .nav-logo small {
+    display: block;
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 0.52rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-top: 3px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2.4rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    color: var(--mute);
+    text-decoration: none;
+    font-size: 0.64rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--brass-bright); }
+
+  .nav-cta {
+    border: 1px solid var(--brass-deep);
+    color: var(--brass-bright) !important;
+    padding: 10px 22px;
+    transition: all 0.3s !important;
+  }
+
+  .nav-cta:hover {
+    background: var(--brass);
+    color: var(--ink) !important;
+  }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 6px;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 26px; height: 1px;
+    background: var(--brass);
+  }
+
+  /* ============ MOBILE MENU ============ */
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 12, 0.98);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+
+  .mobile-menu.open { opacity: 1; visibility: visible; }
+
+  .mobile-menu a {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 2rem;
+    color: var(--bone);
+    text-decoration: none;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.45s ease, transform 0.45s ease, color 0.3s;
+  }
+
+  .mobile-menu.open a { opacity: 1; transform: translateY(0); }
+  .mobile-menu.open a:nth-child(2) { transition-delay: 0.06s; }
+  .mobile-menu.open a:nth-child(3) { transition-delay: 0.12s; }
+  .mobile-menu.open a:nth-child(4) { transition-delay: 0.18s; }
+  .mobile-menu.open a:nth-child(5) { transition-delay: 0.24s; }
+  .mobile-menu.open a:nth-child(6) { transition-delay: 0.3s; }
+  .mobile-menu a:hover { color: var(--brass-bright); }
+
+  .mobile-close {
+    position: absolute;
+    top: 24px; right: 5%;
+    background: none;
+    border: none;
+    color: var(--brass);
+    font-size: 1.8rem;
+    font-weight: 300;
+  }
+
+  /* ============ HERO ============ */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 140px 7% 120px;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 75% 25%, rgba(212, 179, 106, 0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 45% 40% at 15% 85%, rgba(15, 42, 33, 0.5) 0%, transparent 65%),
+      linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+  }
+
+  .hero-cols {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size: 25% 100%;
+    opacity: 0.5;
+  }
+
+  .hero-orb {
+    position: absolute;
+    width: 540px; height: 540px;
+    right: -140px; top: -120px;
+    border-radius: 50%;
+    background: conic-gradient(from 120deg, transparent, rgba(212, 179, 106, 0.1), transparent 60%);
+    filter: blur(50px);
+    animation: orbSpin 26s linear infinite;
+  }
+
+  @keyframes orbSpin { to { transform: rotate(360deg); } }
+
+  .hero-corner {
+    position: absolute;
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--dim);
+    z-index: 2;
+  }
+
+  .hero-corner.tl { top: 100px; left: 4.5%; }
+  .hero-corner.tr { top: 100px; right: 4.5%; text-align: right; }
+  .hero-corner.bl { bottom: 42px; left: 4.5%; }
+  .hero-corner.br { bottom: 42px; right: 4.5%; text-align: right; }
+
+  .hero-content { position: relative; z-index: 3; max-width: 1100px; }
+
+  .hero-el {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.9s cubic-bezier(.22, 1, .36, 1), transform 0.9s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  body.in .hero-el { opacity: 1; transform: translateY(0); }
+  body.in .hero-el.d1 { transition-delay: 0.15s; }
+  body.in .hero-el.d2 { transition-delay: 0.3s; }
+  body.in .hero-el.d3 { transition-delay: 0.45s; }
+  body.in .hero-el.d4 { transition-delay: 0.6s; }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 2.4rem;
+    display: block;
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(3.4rem, 9.4vw, 8.4rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin-bottom: 2.6rem;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--brass-bright);
+  }
+
+  .hero-rotator {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 2.8rem;
+  }
+
+  .hero-rotator .word {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.5rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--brass-bright);
+    display: inline-block;
+    min-width: 200px;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .hero-rotator .word.swap {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn-solid {
+    background: var(--brass);
+    color: var(--ink);
+    padding: 17px 42px;
+    border: 1px solid var(--brass);
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.35s ease;
+  }
+
+  .btn-solid:hover {
+    background: var(--brass-bright);
+    border-color: var(--brass-bright);
+    box-shadow: 0 0 50px rgba(212, 179, 106, 0.3);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--bone);
+    padding: 17px 42px;
+    border: 1px solid rgba(236, 229, 216, 0.22);
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.35s ease;
+  }
+
+  .btn-ghost:hover { border-color: var(--brass); color: var(--brass-bright); }
+
+  /* ============ OUTLINE MARQUEE ============ */
+  .big-marquee {
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 30px 0;
+    background: var(--ink-2);
+  }
+
+  .big-marquee-inner {
+    display: inline-block;
+    animation: marquee 38s linear infinite;
+  }
+
+  .big-marquee span {
+    font-family: var(--serif);
+    font-size: clamp(3.4rem, 8vw, 6.6rem);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(212, 179, 106, 0.4);
+    margin: 0 2.4rem;
+    letter-spacing: 0.02em;
+  }
+
+  .big-marquee span.fill {
+    color: var(--brass);
+    -webkit-text-stroke: 0;
+    font-style: italic;
+  }
+
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  /* ============ SHARED ============ */
+  section { position: relative; }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--brass);
+    display: block;
+    margin-bottom: 1.4rem;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(34px);
+    transition: opacity 0.9s cubic-bezier(.22, 1, .36, 1), transform 0.9s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .rd-1 { transition-delay: 0.1s; }
+  .rd-2 { transition-delay: 0.2s; }
+
+  /* ============ MANIFESTO ============ */
+  #manifesto {
+    padding: 170px 7%;
+    background: var(--ink);
+  }
+
+  .manifesto-wrap { max-width: 980px; margin: 0 auto; }
+
+  .manifesto-text {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 4.2vw, 3.2rem);
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+
+  .manifesto-text .w {
+    opacity: 0.12;
+    transition: opacity 0.45s ease;
+  }
+
+  .manifesto-text .w.on { opacity: 1; }
+  .manifesto-text .w.gold { color: var(--brass-bright); font-style: italic; }
+
+  /* ============ HORIZONTAL — WHERE WE POUR ============ */
+  #where { background: var(--ink-2); }
+
+  .hscroll { height: 340vh; position: relative; }
+
+  .hsticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .where-head {
+    padding: 0 7%;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .where-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    line-height: 1.05;
+  }
+
+  .where-head h2 em { font-style: italic; color: var(--brass-bright); }
+
+  .where-head .scroll-note {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  .htrack {
+    display: flex;
+    gap: 3vw;
+    padding: 0 7%;
+    will-change: transform;
+  }
+
+  .venue {
+    flex: 0 0 min(58vw, 720px);
+    height: min(58vh, 520px);
+    border: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .venue .ghost {
+    position: absolute;
+    top: -3rem; right: 0.5rem;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17rem;
+    line-height: 1;
+    color: rgba(212, 179, 106, 0.07);
+    pointer-events: none;
+  }
+
+  .venue .v-tag {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 1rem;
+  }
+
+  .venue h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.9rem, 3.4vw, 3rem);
+    line-height: 1.05;
+    margin-bottom: 1rem;
+  }
+
+  .venue h3 em { font-style: italic; color: var(--brass-bright); }
+
+  .venue p { color: var(--mute); max-width: 420px; font-size: 0.95rem; }
+
+  .venue.v1 { background: linear-gradient(165deg, #181109 0%, #0F0A05 100%); }
+  .venue.v2 { background: linear-gradient(165deg, #0E2A20 0%, #081710 100%); }
+  .venue.v3 { background: linear-gradient(165deg, #12141F 0%, #0A0B12 100%); }
+  .venue.v4 { background: linear-gradient(165deg, #220F15 0%, #12080B 100%); }
+
+  /* ============ TASTING INDEX ============ */
+  #tasting {
+    padding: 160px 7%;
+    background: var(--ink);
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .tasting-head {
+    max-width: 1100px;
+    margin: 0 auto 4.5rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .tasting-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+  }
+
+  .tasting-head h2 em { font-style: italic; color: var(--brass-bright); }
+
+  .tasting-head .note {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .dishes { max-width: 1100px; margin: 0 auto; border-top: 1px solid var(--line); }
+
+  .dish {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.3s;
+  }
+
+  .dish-row {
+    display: grid;
+    grid-template-columns: 70px 1fr auto auto;
+    align-items: baseline;
+    gap: 2rem;
+    padding: 1.9rem 1rem;
+    transition: padding 0.3s;
+  }
+
+  .dish:hover { background: rgba(212, 179, 106, 0.03); }
+  .dish:hover .dish-row { padding-left: 1.8rem; }
+
+  .dish .idx {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--dim);
+  }
+
+  .dish .name {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.5rem, 3vw, 2.3rem);
+    line-height: 1.1;
+    transition: color 0.3s, font-style 0.3s;
+  }
+
+  .dish:hover .name { color: var(--brass-bright); font-style: italic; }
+
+  .dish .kind {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .dish .price {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--brass);
+  }
+
+  .dish-detail {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  .dish.openD .dish-detail { max-height: 130px; }
+
+  .dish-detail-inner {
+    padding: 0 1rem 1.8rem calc(70px + 3rem);
+    color: var(--mute);
+    font-size: 0.92rem;
+    max-width: 720px;
+  }
+
+  .dish-detail-inner b { color: var(--brass); font-weight: 500; }
+
+  /* floating peek */
+  #peek {
+    position: fixed;
+    top: 0; left: 0;
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    border: 1px solid var(--line);
+    backdrop-filter: blur(4px);
+  }
+
+  #peek.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+  /* ============ THE RESERVE (FLASHLIGHT) ============ */
+  #reserve {
+    padding: 160px 7%;
+    background: #07070A;
+    border-top: 1px solid var(--line-soft);
+    overflow: hidden;
+  }
+
+  .reserve-wrap { max-width: 900px; margin: 0 auto; position: relative; }
+
+  .reserve-head { margin-bottom: 4rem; position: relative; z-index: 2; }
+
+  .reserve-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+  }
+
+  .reserve-head h2 em { font-style: italic; color: var(--brass-bright); }
+
+  .reserve-head .whisper {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 1rem;
+    display: block;
+  }
+
+  .shelf { border-top: 1px solid rgba(212, 179, 106, 0.12); }
+
+  .pour {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 1.7rem 0.4rem;
+    border-bottom: 1px solid rgba(212, 179, 106, 0.12);
+  }
+
+  .pour .p-name {
+    font-family: var(--serif);
+    font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+  }
+
+  .pour .p-note {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    flex: 1;
+  }
+
+  .pour .p-price {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--brass);
+    white-space: nowrap;
+  }
+
+  #veil {
+    position: absolute;
+    inset: -60px;
+    pointer-events: none;
+    z-index: 3;
+    background: rgba(5, 5, 7, 0.93);
+  }
+
+  #reserve.lit #veil { transition: background 0.05s linear; }
+
+  @media (hover: none), (pointer: coarse) {
+    #veil { background: rgba(5, 5, 7, 0.35) !important; }
+  }
+
+  /* ============ WORDS ============ */
+  #words {
+    padding: 160px 7%;
+    background: var(--ink-2);
+    border-top: 1px solid var(--line-soft);
+    text-align: center;
+  }
+
+  .words-wrap { max-width: 860px; margin: 0 auto; }
+
+  .words-stage { transition: opacity 0.45s ease; min-height: 190px; }
+  .words-stage.fading { opacity: 0; }
+
+  .words-quote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.5rem, 3.4vw, 2.4rem);
+    line-height: 1.45;
+    color: var(--bone);
+  }
+
+  .words-by {
+    margin-top: 2.2rem;
+    font-family: var(--mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .words-what {
+    margin-top: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .words-dots {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 2.8rem;
+  }
+
+  .words-dot {
+    width: 28px; height: 14px;
+    background: none;
+    border: none;
+    position: relative;
+  }
+
+  .words-dot::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 1px;
+    background: rgba(212, 179, 106, 0.25);
+    transition: background 0.3s;
+  }
+
+  .words-dot.active::after { background: var(--brass-bright); }
+
+  /* ============ RSVP ============ */
+  #rsvp {
+    padding: 160px 7%;
+    background: var(--ink);
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .rsvp-head { text-align: center; margin-bottom: 4rem; }
+
+  .rsvp-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.4rem, 5.4vw, 4.4rem);
+  }
+
+  .rsvp-head h2 em { font-style: italic; color: var(--brass-bright); }
+
+  .rsvp-head p {
+    margin-top: 1.2rem;
+    color: var(--mute);
+    font-size: 0.95rem;
+    max-width: 460px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .rsvp-grid {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 3rem;
+    max-width: 1080px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  .calendar {
+    border: 1px solid var(--line);
+    padding: 2.2rem;
+    background: var(--ink-2);
+  }
+
+  .cal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.6rem;
+  }
+
+  .cal-head h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.3rem;
+  }
+
+  .cal-nav {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--brass);
+    width: 36px; height: 36px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+  }
+
+  .cal-nav:hover { background: var(--brass); color: var(--ink); }
+
+  .cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .cal-days span {
+    font-family: var(--mono);
+    font-size: 0.52rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding: 4px 0;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    transition: all 0.22s ease;
+  }
+
+  .cal-day.empty { visibility: hidden; }
+  .cal-day.past { color: var(--dim); opacity: 0.4; }
+
+  .cal-day.available {
+    border: 1px solid rgba(212, 179, 106, 0.16);
+    color: var(--bone);
+  }
+
+  .cal-day.available:hover {
+    background: rgba(212, 179, 106, 0.18);
+    border-color: var(--brass);
+  }
+
+  .cal-day.booked {
+    color: var(--dim);
+    text-decoration: line-through;
+    text-decoration-color: rgba(212, 179, 106, 0.4);
+  }
+
+  .cal-day.today { border: 1px solid var(--brass); color: var(--brass-bright); }
+
+  .cal-day.selected {
+    background: var(--brass) !important;
+    border-color: var(--brass-bright) !important;
+    color: var(--ink) !important;
+    font-weight: 700;
+  }
+
+  .cal-legend {
+    display: flex;
+    gap: 1.6rem;
+    justify-content: center;
+    margin-top: 1.4rem;
+    font-family: var(--mono);
+    font-size: 0.52rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .cal-legend .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .dot.av { background: rgba(212, 179, 106, 0.35); }
+  .dot.bk { background: transparent; border: 1px solid var(--dim); }
+  .dot.td { background: transparent; border: 1px solid var(--brass); }
+
+  .rsvp-form {
+    border: 1px solid var(--line);
+    padding: 2.6rem;
+    background: var(--ink-2);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .fg { display: flex; flex-direction: column; gap: 8px; }
+  .fg.full { grid-column: 1 / -1; }
+
+  .fg label {
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+
+  .fg input, .fg select, .fg textarea {
+    background: rgba(5, 5, 7, 0.6);
+    border: 1px solid var(--line);
+    color: var(--bone);
+    padding: 13px 15px;
+    font-family: var(--sans);
+    font-size: 0.93rem;
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.3s;
+    -webkit-appearance: none;
+    width: 100%;
+    color-scheme: dark;
+  }
+
+  .fg select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23D4B36A' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+  }
+
+  .fg select option { background: var(--ink-2); }
+
+  .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--brass); }
+  .fg input::placeholder, .fg textarea::placeholder { color: var(--dim); }
+  .fg textarea { resize: vertical; min-height: 96px; }
+
+  .fg input.error, .fg select.error, .fg textarea.error { border-color: #8E4747; }
+
+  .err {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: #B06B6B;
+    display: none;
+  }
+
+  .err.show { display: block; }
+
+  .form-submit { margin-top: 2.2rem; text-align: center; }
+
+  .form-submit button {
+    background: var(--brass);
+    color: var(--ink);
+    border: 1px solid var(--brass);
+    padding: 16px 52px;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+  }
+
+  .form-submit button:hover {
+    background: var(--brass-bright);
+    box-shadow: 0 0 40px rgba(212, 179, 106, 0.25);
+  }
+
+  .form-submit .fine {
+    margin-top: 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.54rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .success-msg { display: none; text-align: center; padding: 3rem 1rem; }
+  .success-msg.show { display: block; }
+
+  .success-msg h3 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 2.2rem;
+    color: var(--brass-bright);
+    margin-bottom: 1rem;
+  }
+
+  .success-msg p { color: var(--mute); max-width: 380px; margin: 0 auto; }
+
+  /* ============ FOOTER ============ */
+  footer {
+    background: #07070A;
+    border-top: 1px solid var(--line-soft);
+    padding: 110px 7% 50px;
+    overflow: hidden;
+  }
+
+  .footer-mark {
+    font-family: var(--serif);
+    font-size: clamp(3.4rem, 12vw, 11rem);
+    line-height: 0.95;
+    text-align: center;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(212, 179, 106, 0.4);
+    margin-bottom: 1.4rem;
+    white-space: nowrap;
+  }
+
+  .footer-tag {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 5rem;
+  }
+
+  .footer-cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+    max-width: 900px;
+    margin: 0 auto 4rem;
+    text-align: center;
+  }
+
+  .footer-col h4 {
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 1.3rem;
+  }
+
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 0.6rem; }
+
+  .footer-col a, .footer-col span {
+    color: var(--mute);
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.3s;
+  }
+
+  .footer-col a:hover { color: var(--brass-bright); }
+
+  .footer-bottom {
+    padding-top: 2rem;
+    border-top: 1px solid var(--line-soft);
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .footer-bottom a { color: var(--brass); text-decoration: none; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 980px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .hscroll { height: auto; }
+    .hsticky { position: static; height: auto; padding: 100px 0; }
+    .htrack { flex-direction: column; transform: none !important; padding: 0 6%; gap: 1.6rem; }
+    .venue { flex: none; width: 100%; height: auto; min-height: 320px; }
+    .venue .ghost { font-size: 10rem; }
+    .rsvp-grid { grid-template-columns: 1fr; }
+    .hero-corner.tr, .hero-corner.br { display: none; }
+    .dish-row { grid-template-columns: 44px 1fr auto; }
+    .dish .kind { display: none; }
+    .dish-detail-inner { padding-left: calc(44px + 2rem); }
+    #peek { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    .footer-cols { grid-template-columns: 1fr; gap: 2.2rem; }
+    .footer-bottom { flex-direction: column; gap: 0.9rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    .rsvp-form, .calendar { padding: 1.8rem 1.4rem; }
+    #manifesto, #tasting, #reserve, #words, #rsvp { padding-left: 6%; padding-right: 6%; }
+    .where-head { flex-direction: column; gap: 0.6rem; }
+    .hero-rotator .word { min-width: 150px; font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- THE DOOR -->
+<div id="door">
+  <div class="door-panel left"><div class="door-handle"></div></div>
+  <div class="door-panel right"><div class="door-handle"></div></div>
+  <div class="door-center">
+    <div class="door-knock">*knock knock*</div>
+    <div class="peephole">
+      <div class="peep-light"></div>
+      <div class="peep-slit"><div class="peep-eye"></div><div class="peep-eye"></div></div>
+    </div>
+    <div class="door-whisper" id="whisper"></div>
+    <div class="door-skip">click anywhere to enter</div>
+  </div>
+</div>
+
+<!-- CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- FLOATING MENU PEEK -->
+<div id="peek"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    The Copper Still
+    <small>After Dark</small>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#where">Where We Pour</a></li>
+    <li><a href="#tasting">Tasting Index</a></li>
+    <li><a href="#reserve">The Reserve</a></li>
+    <li><a href="#words">Words</a></li>
+    <li><a href="#rsvp" class="nav-cta">RSVP</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="toggleMenu()" aria-label="Close menu">&times;</button>
+  <a href="#where" onclick="toggleMenu()">Where We Pour</a>
+  <a href="#tasting" onclick="toggleMenu()">Tasting Index</a>
+  <a href="#reserve" onclick="toggleMenu()">The Reserve</a>
+  <a href="#words" onclick="toggleMenu()">Words</a>
+  <a href="#rsvp" onclick="toggleMenu()">RSVP</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-cols"></div>
+  <div class="hero-orb"></div>
+
+  <div class="hero-corner tl">Est. MMXVIII</div>
+  <div class="hero-corner tr">Members &amp; guests</div>
+  <div class="hero-corner bl">Bar &amp; event catering</div>
+  <div class="hero-corner br">No fixed address</div>
+
+  <div class="hero-content">
+    <span class="hero-eyebrow hero-el">[ The Copper Still — After Dark ]</span>
+    <h1 class="hero-title hero-el d1">A cocktail bar<br>with <em>no fixed address.</em></h1>
+    <div class="hero-rotator hero-el d2">
+      <span>Tonight we're pouring at</span>
+      <span class="word" id="rotWord">a rooftop wedding</span>
+    </div>
+    <div class="hero-btns hero-el d3">
+      <a href="#rsvp" class="btn-solid">Request a Night</a>
+      <a href="#tasting" class="btn-ghost">Tasting Index</a>
+    </div>
+  </div>
+</section>
+
+<!-- BIG MARQUEE -->
+<div class="big-marquee" aria-hidden="true">
+  <div class="big-marquee-inner">
+    <span>The Copper Still</span><span class="fill">after dark</span><span>no fixed address</span><span class="fill">est. 2018</span><span>The Copper Still</span><span class="fill">after dark</span><span>no fixed address</span><span class="fill">est. 2018</span>
+  </div>
+</div>
+
+<!-- MANIFESTO -->
+<section id="manifesto">
+  <div class="manifesto-wrap">
+    <span class="tag reveal">[ N°01 — The Belief ]</span>
+    <p class="manifesto-text" id="manifestoText">We believe the bar is the best room of any party. That ice is architecture. That a drink made with intention can turn strangers into a story. We arrive after sunset, build a bar where there wasn't one, and leave before the myth does.</p>
+  </div>
+</section>
+
+<!-- WHERE WE POUR -->
+<section id="where">
+  <div class="hscroll" id="hscroll">
+    <div class="hsticky">
+      <div class="where-head">
+        <div>
+          <span class="tag">[ N°02 — The Venues ]</span>
+          <h2>Anywhere with a <em>view of the night.</em></h2>
+        </div>
+        <span class="scroll-note">scroll — we'll drive &darr;</span>
+      </div>
+      <div class="htrack" id="htrack">
+        <div class="venue v1">
+          <span class="ghost">01</span>
+          <div class="v-tag">Rooftops &amp; Terraces</div>
+          <h3>Skyline <em>service</em></h3>
+          <p>City lights below, clear ice above. We've poured at sunset forty floors up and the drinks never blinked.</p>
+        </div>
+        <div class="venue v2">
+          <span class="ghost">02</span>
+          <div class="v-tag">Weddings &amp; Estates</div>
+          <h3>Vows, then <em>vermouth</em></h3>
+          <p>From the welcome coupe to the last dance. A signature cocktail invented for the couple — named, garnished, remembered.</p>
+        </div>
+        <div class="venue v3">
+          <span class="ghost">03</span>
+          <div class="v-tag">Studios &amp; Launches</div>
+          <h3>Openings with <em>intent</em></h3>
+          <p>Product launches and client dinners that close deals. Branded menus, polished pace, zero fuss.</p>
+        </div>
+        <div class="venue v4">
+          <span class="ghost">04</span>
+          <div class="v-tag">Lofts &amp; Living Rooms</div>
+          <h3>House parties, <em>elevated</em></h3>
+          <p>Twenty guests, one perfect bar in the corner of your living room. The most requested booking we do.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TASTING INDEX -->
+<section id="tasting">
+  <div class="tasting-head reveal">
+    <div>
+      <span class="tag">[ N°03 — Tasting Index ]</span>
+      <h2>The <em>pour list</em></h2>
+    </div>
+    <span class="note">hover to peek — click for the build</span>
+  </div>
+
+  <div class="dishes reveal rd-1">
+    <div class="dish" data-emoji="🥃" data-tint="rgba(217,142,50,0.18)" onclick="this.classList.toggle('openD')">
+      <div class="dish-row">
+        <span class="idx">01</span>
+        <span class="name">Old Fashioned</span>
+        <span class="kind">Classic / Stirred</span>
+        <span class="price">€14</span>
+      </div>
+      <div class="dish-detail"><div class="dish-detail-inner"><b>The build —</b> 60ml bourbon, demerara, Angostura, orange oils over hand-cut clear ice. Stirred low and slow.</div></div>
+    </div>
+    <div class="dish" data-emoji="🍋" data-tint="rgba(232,197,71,0.16)" onclick="this.classList.toggle('openD')">
+      <div class="dish-row">
+        <span class="idx">02</span>
+        <span class="name">Copper Sour</span>
+        <span class="kind">House Signature</span>
+        <span class="price">€13</span>
+      </div>
+      <div class="dish-detail"><div class="dish-detail-inner"><b>The build —</b> 50ml rye, fresh lemon, honey syrup, silk of egg white. Bright on top, warm underneath.</div></div>
+    </div>
+    <div class="dish" data-emoji="🌹" data-tint="rgba(196,69,54,0.18)" onclick="this.classList.toggle('openD')">
+      <div class="dish-row">
+        <span class="idx">03</span>
+        <span class="name">Negroni Rosso</span>
+        <span class="kind">Aperitif / Equal Parts</span>
+        <span class="price">€13</span>
+      </div>
+      <div class="dish-detail"><div class="dish-detail-inner"><b>The build —</b> Gin, Campari, sweet vermouth — a third each. Orange twist. Stirred, never shaken.</div></div>
+    </div>
+    <div class="dish" data-emoji="🥂" data-tint="rgba(229,217,168,0.15)" onclick="this.classList.toggle('openD')">
+      <div class="dish-row">
+        <span class="idx">04</span>
+        <span class="name">Elderflower Fizz</span>
+        <span class="kind">Celebration / Sparkling</span>
+        <span class="price">€12</span>
+      </div>
+      <div class="dish-detail"><div class="dish-detail-inner"><b>The build —</b> Gin, elderflower cordial, fresh lime, prosecco top, mint. The wedding welcome drink.</div></div>
+    </div>
+    <div class="dish" data-emoji="🌿" data-tint="rgba(127,160,90,0.18)" onclick="this.classList.toggle('openD')">
+      <div class="dish-row">
+        <span class="idx">05</span>
+        <span class="name">Mezcal Mule</span>
+        <span class="kind">Smoke &amp; Earth</span>
+        <span class="price">€15</span>
+      </div>
+      <div class="dish-detail"><div class="dish-detail-inner"><b>The build —</b> 50ml mezcal, lime, ginger beer, smoked salt rim, jalapeño coin. Turns heads.</div></div>
+    </div>
+    <div class="dish" data-emoji="🫧" data-tint="rgba(224,101,58,0.16)" onclick="this.classList.toggle('openD')">
+      <div class="dish-row">
+        <span class="idx">06</span>
+        <span class="name">Sunset Shrub</span>
+        <span class="kind">Zero Proof</span>
+        <span class="price">€9</span>
+      </div>
+      <div class="dish-detail"><div class="dish-detail-inner"><b>The build —</b> Blood orange shrub, ginger syrup, sparkling water, fresh thyme. Nobody misses the alcohol.</div></div>
+    </div>
+    <div class="dish" data-emoji="✒️" data-tint="rgba(212,179,106,0.16)" onclick="this.classList.toggle('openD')">
+      <div class="dish-row">
+        <span class="idx">07</span>
+        <span class="name">Yours, Unwritten</span>
+        <span class="kind">Bespoke Commission</span>
+        <span class="price">—</span>
+      </div>
+      <div class="dish-detail"><div class="dish-detail-inner"><b>The build —</b> A signature cocktail invented for your event. You name it, we compose it. Price on consultation.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- THE RESERVE -->
+<section id="reserve">
+  <div class="reserve-wrap">
+    <div class="reserve-head reveal">
+      <span class="tag">[ N°04 — The Reserve ]</span>
+      <h2>The shelf we <em>don't advertise.</em></h2>
+      <span class="whisper">it's dark in here — bring your cursor</span>
+    </div>
+
+    <div class="shelf">
+      <div class="pour">
+        <span class="p-name">1998 Bas-Armagnac</span>
+        <span class="p-note">— single cask, poured tableside</span>
+        <span class="p-price">€22</span>
+      </div>
+      <div class="pour">
+        <span class="p-name">Single-Village Mezcal</span>
+        <span class="p-note">— 90 bottles a year, we get six</span>
+        <span class="p-price">€19</span>
+      </div>
+      <div class="pour">
+        <span class="p-name">Japanese Single Malt</span>
+        <span class="p-note">— mizunara oak, quietly legendary</span>
+        <span class="p-price">€24</span>
+      </div>
+      <div class="pour">
+        <span class="p-name">Grower Champagne, Magnum</span>
+        <span class="p-note">— for the toast that matters</span>
+        <span class="p-price">€30</span>
+      </div>
+      <div class="pour">
+        <span class="p-name">The Founder's Blend</span>
+        <span class="p-note">— ask the bartender. that's all we'll say</span>
+        <span class="p-price">€?</span>
+      </div>
+    </div>
+
+    <div id="veil"></div>
+  </div>
+</section>
+
+<!-- WORDS -->
+<section id="words">
+  <div class="words-wrap">
+    <span class="tag reveal">[ N°05 — Overheard ]</span>
+    <div class="words-stage reveal rd-1" id="wordsStage">
+      <blockquote class="words-quote" id="wordsQuote"></blockquote>
+      <div class="words-by" id="wordsBy"></div>
+      <div class="words-what" id="wordsWhat"></div>
+    </div>
+    <div class="words-dots" id="wordsDots"></div>
+  </div>
+</section>
+
+<!-- RSVP -->
+<section id="rsvp">
+  <div class="rsvp-head reveal">
+    <span class="tag" style="display:inline-block;">[ N°06 — RSVP ]</span>
+    <h2>Request a <em>night</em></h2>
+    <p>Pick a date, tell us about the evening. We reply within 24 hours — quietly, with a tailored proposal.</p>
+  </div>
+
+  <div class="rsvp-grid">
+    <div class="calendar reveal">
+      <div class="cal-head">
+        <button class="cal-nav" onclick="prevMonth()" aria-label="Previous month">&larr;</button>
+        <h3 id="calMonthLabel"></h3>
+        <button class="cal-nav" onclick="nextMonth()" aria-label="Next month">&rarr;</button>
+      </div>
+      <div class="cal-days">
+        <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <span><span class="dot av"></span>Open</span>
+        <span><span class="dot bk"></span>Taken</span>
+        <span><span class="dot td"></span>Tonight</span>
+      </div>
+    </div>
+
+    <div class="rsvp-form reveal rd-1">
+      <div id="bookingFormWrap">
+        <div class="form-grid">
+          <div class="fg">
+            <label for="fname">Full Name</label>
+            <input type="text" id="fname" placeholder="Jane Smith">
+            <span class="err" id="fname-err">Please enter your name.</span>
+          </div>
+          <div class="fg">
+            <label for="femail">Email</label>
+            <input type="email" id="femail" placeholder="jane@example.com">
+            <span class="err" id="femail-err">Please enter a valid email.</span>
+          </div>
+          <div class="fg">
+            <label for="fphone">Phone</label>
+            <input type="tel" id="fphone" placeholder="+1 (555) 000-0000">
+            <span class="err" id="fphone-err">Please enter your phone number.</span>
+          </div>
+          <div class="fg">
+            <label for="ftype">Occasion</label>
+            <select id="ftype">
+              <option value="" disabled selected>Select an occasion</option>
+              <option value="wedding">Wedding</option>
+              <option value="birthday">Birthday</option>
+              <option value="corporate">Corporate</option>
+              <option value="anniversary">Anniversary</option>
+              <option value="garden">Garden Party</option>
+              <option value="other">Other</option>
+            </select>
+            <span class="err" id="ftype-err">Please select an occasion.</span>
+          </div>
+          <div class="fg">
+            <label for="fdate">Date</label>
+            <input type="date" id="fdate">
+            <span class="err" id="fdate-err">Please select a date.</span>
+          </div>
+          <div class="fg">
+            <label for="fguests">Guests</label>
+            <input type="number" id="fguests" placeholder="e.g. 80" min="1">
+            <span class="err" id="fguests-err">Please enter a guest count.</span>
+          </div>
+          <div class="fg full">
+            <label for="fmsg">The Evening</label>
+            <textarea id="fmsg" placeholder="The venue, the guests, the feeling you're after…"></textarea>
+          </div>
+        </div>
+        <div class="form-submit">
+          <button type="button" onclick="submitForm()">Send Request</button>
+          <div class="fine">Replies within 24 hours · No obligation</div>
+        </div>
+      </div>
+      <div class="success-msg" id="successMsg">
+        <h3>Consider it noted.</h3>
+        <p>We'll be in touch within 24 hours to start composing your evening.</p>
+        <a href="#hero" class="btn-ghost" style="display:inline-block; margin-top:2rem;">Back to the door</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-mark reveal">Copper Still</div>
+  <div class="footer-tag reveal rd-1">No fixed address — city &amp; beyond — est. 2018</div>
+
+  <div class="footer-cols">
+    <div class="footer-col">
+      <h4>Navigate</h4>
+      <ul>
+        <li><a href="#where">Where We Pour</a></li>
+        <li><a href="#tasting">Tasting Index</a></li>
+        <li><a href="#reserve">The Reserve</a></li>
+        <li><a href="#rsvp">RSVP</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Occasions</h4>
+      <ul>
+        <li><a href="#rsvp">Weddings</a></li>
+        <li><a href="#rsvp">Private Parties</a></li>
+        <li><a href="#rsvp">Corporate</a></li>
+        <li><a href="#rsvp">Rooftops</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="mailto:hello@thecopperstill.com">hello@thecopperstill.com</a></li>
+        <li><a href="tel:+15558420016">+1 (555) 842-0016</a></li>
+        <li><span>Mon–Sat · after dark</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; 2026 The Copper Still</p>
+    <a href="#hero">Back to the door &uarr;</a>
+  </div>
+</footer>
+
+<script>
+  // ============ THE DOOR ============
+  const door = document.getElementById('door');
+  const whisperEl = document.getElementById('whisper');
+  let doorOpened = false;
+  const whisperText = 'you look thirsty. come in.';
+
+  function typeWhisper() {
+    let i = 0;
+    const iv = setInterval(() => {
+      whisperEl.textContent = whisperText.slice(0, ++i);
+      if (i >= whisperText.length) clearInterval(iv);
+    }, 38);
+  }
+
+  function openDoor() {
+    if (doorOpened) return;
+    doorOpened = true;
+    door.classList.add('open');
+    document.body.classList.add('in');
+    setTimeout(() => door.classList.add('gone'), 1400);
+  }
+
+  setTimeout(() => { door.classList.add('knock', 'shake'); }, 400);
+  setTimeout(() => door.classList.add('peek'), 1100);
+  setTimeout(typeWhisper, 1700);
+  setTimeout(openDoor, 3400);
+  door.addEventListener('click', openDoor);
+
+  // ============ PROGRESS + NAV + SCROLL EFFECTS ============
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    updateManifesto();
+    updateHScroll();
+  });
+
+  // MOBILE MENU
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // REVEALS
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.14 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ============ CURSOR ============
+  const dot = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
+  });
+
+  (function animRing() {
+    rx += (mx - rx) * 0.13;
+    ry += (my - ry) * 0.13;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  })();
+
+  function bindHoverables() {
+    document.querySelectorAll('a, button, .dish, .cal-day.available').forEach(el => {
+      el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+    });
+  }
+  bindHoverables();
+
+  // ============ HERO ROTATOR ============
+  const rotWords = ['a rooftop wedding', 'a gallery opening', 'somebody’s 40th', 'a product launch', 'your living room'];
+  let rotI = 0;
+  const rotEl = document.getElementById('rotWord');
+
+  setInterval(() => {
+    rotEl.classList.add('swap');
+    setTimeout(() => {
+      rotI = (rotI + 1) % rotWords.length;
+      rotEl.textContent = rotWords[rotI];
+      rotEl.classList.remove('swap');
+    }, 360);
+  }, 2600);
+
+  // ============ MANIFESTO WORD REVEAL ============
+  const mEl = document.getElementById('manifestoText');
+  const goldWords = ['bar', 'ice', 'intention', 'story', 'myth'];
+  mEl.innerHTML = mEl.textContent.split(' ').map(w => {
+    const clean = w.replace(/[.,]/g, '').toLowerCase();
+    const gold = goldWords.includes(clean) ? ' gold' : '';
+    return `<span class="w${gold}">${w}</span>`;
+  }).join(' ');
+  const mWords = mEl.querySelectorAll('.w');
+
+  function updateManifesto() {
+    const r = mEl.getBoundingClientRect();
+    const p = Math.min(Math.max((innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.45), 0), 1);
+    const k = Math.floor(p * mWords.length);
+    mWords.forEach((w, i) => w.classList.toggle('on', i < k));
+  }
+  updateManifesto();
+
+  // ============ HORIZONTAL SCROLL ============
+  const hs = document.getElementById('hscroll');
+  const track = document.getElementById('htrack');
+
+  function updateHScroll() {
+    if (innerWidth < 980) { track.style.transform = ''; return; }
+    const r = hs.getBoundingClientRect();
+    const total = hs.offsetHeight - innerHeight;
+    const p = Math.min(Math.max(-r.top / total, 0), 1);
+    const dist = track.scrollWidth - innerWidth + innerWidth * 0.14;
+    track.style.transform = `translateX(${-p * dist}px)`;
+  }
+  updateHScroll();
+  window.addEventListener('resize', updateHScroll);
+
+  // ============ TASTING PEEK ============
+  const peek = document.getElementById('peek');
+  let px = 0, py = 0, tx = 0, ty = 0;
+
+  document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+
+  (function animPeek() {
+    px += (tx - px) * 0.18;
+    py += (ty - py) * 0.18;
+    peek.style.left = px + 'px';
+    peek.style.top = (py - 80) + 'px';
+    requestAnimationFrame(animPeek);
+  })();
+
+  document.querySelectorAll('.dish').forEach(d => {
+    d.addEventListener('mouseenter', () => {
+      peek.textContent = d.dataset.emoji;
+      peek.style.background = `radial-gradient(circle at 35% 30%, ${d.dataset.tint}, rgba(10,10,12,0.85))`;
+      peek.classList.add('show');
+    });
+    d.addEventListener('mouseleave', () => peek.classList.remove('show'));
+  });
+
+  // ============ FLASHLIGHT ============
+  const reserve = document.getElementById('reserve');
+  const veil = document.getElementById('veil');
+
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    reserve.addEventListener('mousemove', e => {
+      const r = veil.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      reserve.classList.add('lit');
+      veil.style.background = `radial-gradient(circle 150px at ${x}px ${y}px, rgba(5,5,7,0) 0%, rgba(5,5,7,0.55) 60%, rgba(5,5,7,0.93) 100%)`;
+    });
+    reserve.addEventListener('mouseleave', () => {
+      veil.style.background = 'rgba(5,5,7,0.93)';
+    });
+  }
+
+  // ============ WORDS ROTATOR ============
+  const words = [
+    { q: 'The bar at our wedding was the talk of the night. Every cocktail was perfect, the team was charming, and the setup looked absolutely stunning.', by: 'Sophie & Rian', what: 'Wedding · June 2024' },
+    { q: 'Flawless. Professional, creative, and the custom cocktail menu with our branding was a brilliant touch.', by: 'Marcus K.', what: 'Corporate · November 2024' },
+    { q: 'The signature cocktail they created for my 40th — people still ask me for the recipe.', by: 'Anna L.', what: 'Birthday · March 2025' }
+  ];
+
+  let wi = 0;
+  const stage = document.getElementById('wordsStage');
+  const dotsWrap = document.getElementById('wordsDots');
+
+  words.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'words-dot' + (i === 0 ? ' active' : '');
+    b.setAttribute('aria-label', 'Quote ' + (i + 1));
+    b.onclick = () => showWord(i);
+    dotsWrap.appendChild(b);
+  });
+
+  function renderWord() {
+    document.getElementById('wordsQuote').textContent = '“' + words[wi].q + '”';
+    document.getElementById('wordsBy').textContent = words[wi].by;
+    document.getElementById('wordsWhat').textContent = words[wi].what;
+    dotsWrap.querySelectorAll('.words-dot').forEach((d, i) => d.classList.toggle('active', i === wi));
+  }
+
+  function showWord(i) {
+    if (i === wi) return;
+    stage.classList.add('fading');
+    setTimeout(() => { wi = i; renderWord(); stage.classList.remove('fading'); }, 440);
+  }
+
+  renderWord();
+  setInterval(() => showWord((wi + 1) % words.length), 8000);
+
+  // ============ CALENDAR ============
+  const bookedDays = {
+    0: [3,4,10,17,18,24], 1: [1,7,8,14,21,22,28], 2: [6,7,13,20,21,27],
+    3: [3,4,10,11,17,25,26], 4: [1,8,9,15,22,23,29,30], 5: [5,6,12,13,19,20,26,27],
+    6: [3,4,10,11,17,24,25], 7: [1,7,8,14,15,21,22,28,29], 8: [4,5,11,12,18,19,25,26],
+    9: [2,3,9,10,16,17,23,24,30,31], 10: [6,7,13,14,20,21,27,28], 11: [4,5,11,12,18,19,24,25,31]
+  };
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now = new Date();
+  let calYear = now.getFullYear();
+  let calMonth = now.getMonth();
+  let selectedCalDay = null;
+
+  function renderCalendar() {
+    const label = document.getElementById('calMonthLabel');
+    const grid = document.getElementById('calGrid');
+    label.textContent = monthNames[calMonth] + ' ' + calYear;
+    grid.innerHTML = '';
+
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const offset = (firstDay === 0) ? 6 : firstDay - 1;
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const today = new Date();
+
+    for (let i = 0; i < offset; i++) {
+      const blank = document.createElement('div');
+      blank.className = 'cal-day empty';
+      grid.appendChild(blank);
+    }
+
+    const booked = bookedDays[calMonth] || [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const el = document.createElement('div');
+      const date = new Date(calYear, calMonth, d);
+      const isToday = date.toDateString() === today.toDateString();
+      const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const isBooked = booked.includes(d);
+      const isSelected = selectedCalDay === `${calYear}-${calMonth}-${d}`;
+
+      el.textContent = d;
+      if (isPast) el.className = 'cal-day past';
+      else if (isBooked) el.className = 'cal-day booked';
+      else el.className = 'cal-day available';
+      if (isToday) el.classList.add('today');
+      if (isSelected) el.classList.add('selected');
+
+      if (!isPast && !isBooked) {
+        el.addEventListener('click', () => {
+          selectedCalDay = `${calYear}-${calMonth}-${d}`;
+          const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const fdate = document.getElementById('fdate');
+          fdate.value = dateStr;
+          fdate.dispatchEvent(new Event('input'));
+          renderCalendar();
+        });
+      }
+      grid.appendChild(el);
+    }
+    bindHoverables();
+  }
+
+  function prevMonth() {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  }
+
+  function nextMonth() {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  }
+
+  renderCalendar();
+
+  // ============ FORM ============
+  function submitForm() {
+    let valid = true;
+    const fields = [
+      { id: 'fname', check: v => v.trim().length > 1 },
+      { id: 'femail', check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+      { id: 'fphone', check: v => v.trim().length > 5 },
+      { id: 'ftype', check: v => v !== '' },
+      { id: 'fdate', check: v => v !== '' },
+      { id: 'fguests', check: v => parseInt(v) > 0 }
+    ];
+
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      const err = document.getElementById(f.id + '-err');
+      const ok = f.check(el.value);
+      el.classList.toggle('error', !ok);
+      err.classList.toggle('show', !ok);
+      if (!ok) valid = false;
+    });
+
+    if (valid) {
+      document.getElementById('bookingFormWrap').style.display = 'none';
+      document.getElementById('successMsg').classList.add('show');
+      document.getElementById('rsvp').scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  ['fname','femail','fphone','ftype','fdate','fguests'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      el.classList.remove('error');
+      document.getElementById(id + '-err').classList.remove('show');
+    });
+  });
+
+  document.getElementById('fdate').setAttribute('min', new Date().toISOString().split('T')[0]);
+</script>
+</body>
+</html>
