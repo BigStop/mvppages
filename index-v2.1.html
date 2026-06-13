@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Copper Still — Bar & Catering</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0C0A07;
+    --bg-2: #100D09;
+    --ink: #EDE5D8;
+    --ink-dim: #8F8475;
+    --ink-faint: #56503F;
+    --copper: #B87333;
+    --copper-bright: #D89B5A;
+    --hairline: rgba(184, 115, 51, 0.18);
+    --serif: 'Cormorant Garamond', serif;
+    --sans: 'Inter', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  ::selection { background: var(--copper); color: var(--bg); }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #2A2318; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--copper); }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-weight: 300;
+    line-height: 1.75;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* film grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9000;
+  }
+
+  /* ===================== LOADER ===================== */
+  #veil {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.6rem;
+    transition: opacity 0.9s ease 0.1s, visibility 0.9s ease 0.1s;
+  }
+
+  #veil.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  .veil-name {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 400;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-indent: 0.45em; /* optically center against tracking */
+    opacity: 0;
+    animation: veilName 1.4s cubic-bezier(.16,1,.3,1) 0.2s forwards;
+  }
+
+  @keyframes veilName {
+    from { opacity: 0; letter-spacing: 0.7em; filter: blur(6px); }
+    to   { opacity: 1; letter-spacing: 0.45em; filter: blur(0); }
+  }
+
+  .veil-line {
+    width: 0;
+    height: 1px;
+    background: var(--copper);
+    animation: veilLine 1.5s cubic-bezier(.65,0,.35,1) 0.5s forwards;
+  }
+
+  @keyframes veilLine { to { width: min(420px, 70vw); } }
+
+  .veil-est {
+    font-size: 0.6rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    text-indent: 0.5em;
+    opacity: 0;
+    animation: fade 1s ease 1.2s forwards;
+  }
+
+  @keyframes fade { to { opacity: 1; } }
+
+  /* ===================== NAV ===================== */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem clamp(1.5rem, 5vw, 4rem);
+    transition: padding 0.4s ease, background 0.4s ease, border-color 0.4s ease;
+    border-bottom: 1px solid transparent;
+  }
+
+  header.tucked {
+    padding-top: 1.1rem;
+    padding-bottom: 1.1rem;
+    background: rgba(12, 10, 7, 0.92);
+    backdrop-filter: blur(16px);
+    border-bottom-color: var(--hairline);
+  }
+
+  .brand {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .menu-links {
+    display: flex;
+    gap: 2.8rem;
+    list-style: none;
+  }
+
+  .menu-links a {
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    text-decoration: none;
+    transition: color 0.3s;
+    position: relative;
+  }
+
+  .menu-links a::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -6px;
+    width: 100%;
+    height: 1px;
+    background: var(--copper);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.35s ease;
+  }
+
+  .menu-links a:hover { color: var(--ink); }
+  .menu-links a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+  .nav-burger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px;
+  }
+  .nav-burger span { width: 26px; height: 1px; background: var(--ink); display: block; }
+
+  .drawer {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+  }
+  .drawer.open { opacity: 1; visibility: visible; }
+  .drawer a {
+    font-family: var(--serif);
+    font-size: 2.2rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .drawer a:hover { color: var(--copper-bright); }
+  .drawer-close {
+    position: absolute;
+    top: 2rem; right: 2rem;
+    background: none; border: none;
+    color: var(--ink-dim);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  /* ===================== HERO ===================== */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 5rem);
+    padding: 9rem clamp(1.5rem, 5vw, 4rem) 6rem;
+    position: relative;
+  }
+
+  .hero-kicker {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: var(--copper-bright);
+    margin-bottom: 3rem;
+  }
+
+  .hero-kicker::before { content: ''; width: 56px; height: 1px; background: var(--copper); }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(3.4rem, 11vw, 9.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+    max-width: 14ch;
+  }
+
+  .hero h1 .line { display: block; overflow: hidden; }
+  .hero h1 .line > span {
+    display: block;
+    transform: translateY(110%);
+    animation: lineUp 1.1s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  .hero h1 .line:nth-child(1) > span { animation-delay: 2.0s; }
+  .hero h1 .line:nth-child(2) > span { animation-delay: 2.12s; }
+  .hero h1 .line:nth-child(3) > span { animation-delay: 2.24s; }
+
+  @keyframes lineUp { to { transform: translateY(0); } }
+
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--copper-bright);
+  }
+
+  .hero-foot {
+    margin-top: 4.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 3rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fade 1.2s ease 2.7s forwards;
+  }
+
+  .hero-foot p {
+    max-width: 36ch;
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--copper);
+    transition: color 0.3s, gap 0.3s;
+    white-space: nowrap;
+  }
+
+  .hero-cta:hover { color: var(--copper-bright); gap: 1.6rem; }
+  .hero-cta .arrow { transition: transform 0.3s; }
+
+  .hero-side {
+    position: absolute;
+    right: clamp(1rem, 3vw, 2.5rem);
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+    font-size: 0.58rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    opacity: 0;
+    animation: fade 1.2s ease 3s forwards;
+  }
+
+  /* ===================== HERO ART ===================== */
+  .hero-art {
+    position: relative;
+    justify-self: center;
+    width: min(420px, 34vw);
+    opacity: 0;
+    animation: fade 1.4s ease 2.3s forwards;
+  }
+
+  .glass-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+    animation: artFloat 7s ease-in-out infinite alternate;
+  }
+
+  @keyframes artFloat {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-10px); }
+  }
+
+  .glass-svg path, .glass-svg circle.outline {
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .glass-line   { stroke: rgba(237, 229, 216, 0.42); stroke-width: 1.3; }
+  .copper-line  { stroke: var(--copper-bright); stroke-width: 1.4; }
+
+  .draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: drawIn 1.1s cubic-bezier(.65,0,.35,1) forwards;
+  }
+
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+
+  .d1 { animation-delay: 2.3s; }
+  .d2 { animation-delay: 2.45s; }
+  .d3 { animation-delay: 3.1s; }
+  .d4 { animation-delay: 2.7s; }
+  .d5 { animation-delay: 2.85s; }
+  .d6 { animation-delay: 3.3s; }
+
+  .liquid-fill {
+    fill: rgba(184, 115, 51, 0.10) !important;
+    stroke: none !important;
+    opacity: 0;
+    animation: fade 1.2s ease 3.5s forwards;
+  }
+
+  .bub {
+    fill: rgba(216, 155, 90, 0.55);
+    stroke: none;
+    opacity: 0;
+    animation: bubRise 3.2s ease-in-out infinite;
+  }
+  .b1 { animation-delay: 3.8s; }
+  .b2 { animation-delay: 4.6s; }
+  .b3 { animation-delay: 5.4s; }
+
+  @keyframes bubRise {
+    0%   { opacity: 0; transform: translateY(6px); }
+    25%  { opacity: 0.8; }
+    60%  { opacity: 0.3; }
+    100% { opacity: 0; transform: translateY(-14px); }
+  }
+
+  .ring {
+    position: absolute;
+    top: -34px;
+    right: -38px;
+    width: 168px;
+    height: 168px;
+    overflow: visible;
+  }
+
+  .ring-spin {
+    animation: ringSpin 32s linear infinite;
+    transform-origin: 100px 100px;
+  }
+
+  @keyframes ringSpin { to { transform: rotate(360deg); } }
+
+  .ring text {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    letter-spacing: 3px;
+    fill: var(--ink-dim);
+  }
+
+  .ring .ring-circle {
+    fill: none;
+    stroke: var(--hairline);
+    stroke-width: 1;
+  }
+
+  .glint {
+    position: absolute;
+    color: var(--copper-bright);
+    opacity: 0;
+    animation: glintTwinkle 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .g1 { top: 12%;  left: -6%;  font-size: 0.7rem;  animation-delay: 3.6s; }
+  .g2 { top: 64%;  right: -9%; font-size: 0.55rem; animation-delay: 4.8s; }
+  .g3 { bottom: 4%; left: 12%; font-size: 0.6rem;  animation-delay: 5.7s; }
+
+  @keyframes glintTwinkle {
+    0%, 100% { opacity: 0; transform: scale(0.6) rotate(0deg); }
+    50%      { opacity: 0.9; transform: scale(1.1) rotate(40deg); }
+  }
+
+  .art-caption {
+    margin-top: 1.6rem;
+    text-align: center;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.04em;
+  }
+
+  .art-caption span { color: var(--copper-bright); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .draw { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+    .glass-svg { animation: none; }
+    .ring-spin { animation: none; }
+    .hero-art { animation: none; opacity: 1; }
+    .liquid-fill { animation: none; opacity: 1; }
+    .bub, .glint { display: none; }
+  }
+
+  /* ===================== MARQUEE ===================== */
+  .marquee {
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    overflow: hidden;
+    padding: 1.4rem 0;
+    white-space: nowrap;
+  }
+
+  .marquee-track {
+    display: inline-block;
+    animation: marquee 38s linear infinite;
+  }
+
+  .marquee span {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ink-dim);
+    margin: 0 2.4rem;
+  }
+
+  .marquee .dot { color: var(--copper); font-style: normal; }
+
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  /* ===================== SHARED ===================== */
+  section { padding: clamp(6rem, 12vw, 10rem) clamp(1.5rem, 5vw, 4rem); }
+
+  .frame { max-width: 1180px; margin: 0 auto; }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 2rem;
+    margin-bottom: clamp(3rem, 7vw, 5.5rem);
+  }
+
+  .sec-num {
+    font-size: 0.62rem;
+    letter-spacing: 0.4em;
+    color: var(--copper);
+    white-space: nowrap;
+  }
+
+  .sec-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    line-height: 1.08;
+  }
+
+  .sec-title em { font-style: italic; color: var(--copper-bright); font-weight: 400; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(36px);
+    transition: opacity 1s cubic-bezier(.16,1,.3,1), transform 1s cubic-bezier(.16,1,.3,1);
+  }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ===================== ABOUT ===================== */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: clamp(3rem, 8vw, 7rem);
+    align-items: start;
+  }
+
+  .about-lede {
+    font-family: var(--serif);
+    font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+    font-weight: 300;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  .about-lede::first-letter {
+    font-size: 3.2em;
+    float: left;
+    line-height: 0.8;
+    margin: 0.08em 0.12em 0 0;
+    color: var(--copper-bright);
+    font-style: italic;
+  }
+
+  .about-body { margin-top: 2.2rem; color: var(--ink-dim); font-size: 0.95rem; max-width: 52ch; }
+  .about-body + .about-body { margin-top: 1.2rem; }
+
+  .ledger { border-top: 1px solid var(--hairline); }
+
+  .ledger-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 1.6rem 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .ledger-row .num {
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    font-weight: 300;
+    color: var(--ink);
+  }
+
+  .ledger-row .num sup { font-size: 0.45em; color: var(--copper-bright); }
+
+  .ledger-row .lbl {
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    text-align: right;
+  }
+
+  /* ===================== SERVICES ===================== */
+  #services { background: var(--bg-2); border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+
+  .svc { border-top: 1px solid var(--hairline); }
+
+  .svc-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 2fr 60px;
+    align-items: center;
+    gap: 2rem;
+    padding: 2.6rem 0.5rem;
+    border-bottom: 1px solid var(--hairline);
+    cursor: pointer;
+    transition: background 0.4s ease, padding 0.4s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .svc-row:hover { background: rgba(184, 115, 51, 0.045); padding-left: 1.4rem; }
+
+  .svc-idx {
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    color: var(--ink-faint);
+  }
+
+  .svc-name {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    font-weight: 300;
+    line-height: 1.1;
+    transition: color 0.3s;
+  }
+
+  .svc-row:hover .svc-name { color: var(--copper-bright); font-style: italic; }
+
+  .svc-desc { color: var(--ink-dim); font-size: 0.92rem; max-width: 52ch; }
+
+  .svc-arrow {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    color: var(--ink-faint);
+    text-align: right;
+    transition: transform 0.35s ease, color 0.35s ease;
+  }
+
+  .svc-row:hover .svc-arrow { transform: translateX(8px); color: var(--copper-bright); }
+
+  /* ===================== MENU ===================== */
+  .list-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2.5rem, 6vw, 5rem);
+  }
+
+  .list-col h3 {
+    font-size: 0.62rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--copper-bright);
+    margin-bottom: 2.4rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .dish { padding: 1.1rem 0; }
+
+  .dish-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+  }
+
+  .dish-name {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .dish-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--ink-faint);
+    transform: translateY(-4px);
+  }
+
+  .dish-price {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    color: var(--copper-bright);
+    white-space: nowrap;
+  }
+
+  .dish-sub {
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    margin-top: 0.3rem;
+    font-style: italic;
+    font-family: var(--serif);
+    font-size: 0.95rem;
+  }
+
+  .menu-note {
+    margin-top: 4rem;
+    text-align: center;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+  }
+
+  .menu-note a { color: var(--copper-bright); }
+
+  /* ===================== QUOTE ===================== */
+  #voices {
+    background: var(--bg-2);
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    text-align: center;
+  }
+
+  .quote-mark {
+    font-family: var(--serif);
+    font-size: 5rem;
+    line-height: 0.5;
+    color: var(--copper);
+    display: block;
+    margin-bottom: 2.5rem;
+  }
+
+  .quote-text {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-style: italic;
+    font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+    line-height: 1.4;
+    max-width: 22ch;
+    margin: 0 auto 2.8rem;
+    min-height: 4.2em;
+    transition: opacity 0.5s ease;
+  }
+
+  .quote-who {
+    font-size: 0.62rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    transition: opacity 0.5s ease;
+  }
+
+  .quote-nav {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.9rem;
+  }
+
+  .quote-pip {
+    width: 28px; height: 1px;
+    background: var(--ink-faint);
+    border: none;
+    padding: 6px 0;
+    background-clip: content-box;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .quote-pip.on { background-color: var(--copper-bright); }
+
+  /* ===================== BOOKING ===================== */
+  .book-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(3rem, 8vw, 7rem);
+    align-items: start;
+  }
+
+  .book-pitch {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .book-pitch em { font-style: italic; color: var(--copper-bright); }
+
+  .book-meta {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+  }
+
+  .book-meta span { color: var(--copper-bright); margin-right: 0.6rem; }
+
+  .field { position: relative; margin-bottom: 2.2rem; }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--ink-faint);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 300;
+    font-size: 1rem;
+    padding: 0.7rem 0;
+    outline: none;
+    border-radius: 0;
+    transition: border-color 0.3s;
+    -webkit-appearance: none;
+  }
+
+  .field select { cursor: pointer; }
+  .field select option { background: var(--bg-2); }
+  .field textarea { resize: vertical; min-height: 90px; }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus { border-bottom-color: var(--copper-bright); }
+
+  .field label {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 0.3rem;
+  }
+
+  .field .err {
+    position: absolute;
+    bottom: -1.25rem;
+    left: 0;
+    font-size: 0.7rem;
+    color: #B85F4D;
+    font-style: italic;
+    font-family: var(--serif);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .field.bad .err { opacity: 1; }
+  .field.bad input, .field.bad select { border-bottom-color: #8A4636; }
+
+  .field-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .book-submit {
+    margin-top: 0.5rem;
+    background: none;
+    border: 1px solid var(--copper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 0.68rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    padding: 1.15rem 3.2rem;
+    cursor: pointer;
+    transition: background 0.35s, color 0.35s, letter-spacing 0.35s;
+  }
+
+  .book-submit:hover:not(:disabled) {
+    background: var(--copper);
+    color: var(--bg);
+    letter-spacing: 0.42em;
+  }
+
+  .book-submit:disabled { opacity: 0.5; cursor: wait; }
+
+  .book-done {
+    display: none;
+    padding: 2rem 0;
+  }
+  .book-done.show { display: block; }
+  .book-done h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-style: italic;
+    font-size: 2rem;
+    color: var(--copper-bright);
+    margin-bottom: 1rem;
+  }
+  .book-done p { color: var(--ink-dim); max-width: 42ch; }
+
+  /* ===================== FOOTER ===================== */
+  footer {
+    border-top: 1px solid var(--hairline);
+    padding: 4rem clamp(1.5rem, 5vw, 4rem) 3rem;
+  }
+
+  .foot-grid {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .foot-brand {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+  }
+
+  .foot-col { font-size: 0.82rem; color: var(--ink-dim); line-height: 2.1; }
+  .foot-col strong {
+    display: block;
+    font-weight: 400;
+    font-size: 0.6rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--copper-bright);
+    margin-bottom: 0.8rem;
+  }
+  .foot-col a { color: var(--ink-dim); text-decoration: none; transition: color 0.3s; }
+  .foot-col a:hover { color: var(--ink); }
+
+  .foot-base {
+    max-width: 1180px;
+    margin: 3.5rem auto 0;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.12em;
+  }
+
+  .foot-base a { color: var(--ink-dim); text-decoration: none; }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 880px) {
+    .menu-links { display: none; }
+    .nav-burger { display: flex; }
+    .about-grid, .book-grid, .list-wrap { grid-template-columns: 1fr; }
+    .svc-row { grid-template-columns: 1fr; gap: 0.6rem; padding: 2rem 0.5rem; }
+    .svc-idx { order: -1; }
+    .svc-arrow { display: none; }
+    .hero-side { display: none; }
+    .field-pair { grid-template-columns: 1fr; gap: 0; }
+    .hero { grid-template-columns: 1fr; gap: 3.5rem; padding-top: 8rem; }
+    .hero-art { width: min(300px, 74vw); justify-self: start; margin-left: 1rem; }
+    .ring { top: -28px; right: -24px; width: 130px; height: 130px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="veil">
+  <div class="veil-name">The Copper Still</div>
+  <div class="veil-line"></div>
+  <div class="veil-est">Bar &amp; Catering &mdash; Est. 2018</div>
+</div>
+
+<!-- NAV -->
+<header id="topbar">
+  <a href="#top" class="brand">The Copper Still</a>
+  <ul class="menu-links">
+    <li><a href="#house">The House</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#voices">Voices</a></li>
+    <li><a href="#booking">Reserve</a></li>
+  </ul>
+  <button class="nav-burger" onclick="drawer(true)" aria-label="Open menu">
+    <span></span><span></span>
+  </button>
+</header>
+
+<div class="drawer" id="drawer">
+  <button class="drawer-close" onclick="drawer(false)">Close</button>
+  <a href="#house" onclick="drawer(false)">The House</a>
+  <a href="#services" onclick="drawer(false)">Services</a>
+  <a href="#menu" onclick="drawer(false)">Menu</a>
+  <a href="#voices" onclick="drawer(false)">Voices</a>
+  <a href="#booking" onclick="drawer(false)">Reserve</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-copy">
+    <div class="hero-kicker">Bar &middot; Catering &middot; Private Events</div>
+    <h1>
+      <span class="line"><span>The bar</span></span>
+      <span class="line"><span>your evening</span></span>
+      <span class="line"><span><em>deserves.</em></span></span>
+    </h1>
+    <div class="hero-foot">
+      <p>Award-winning cocktails and quiet, exacting service — brought to weddings, dinners, and celebrations that intend to be remembered.</p>
+      <a href="#booking" class="hero-cta">Reserve a date <span class="arrow">&rarr;</span></a>
+    </div>
+  </div>
+
+  <div class="hero-art" aria-hidden="true">
+    <svg class="glass-svg" viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+      <!-- coupe rim -->
+      <path class="draw d1 glass-line" pathLength="1" d="M62 120 Q200 136 338 120"/>
+      <!-- bowl -->
+      <path class="draw d2 glass-line" pathLength="1" d="M62 120 C70 196 128 242 200 242 C272 242 330 196 338 120"/>
+      <!-- liquid -->
+      <path class="liquid-fill" d="M84 152 Q200 168 316 152 C302 206 258 232 200 232 C142 232 98 206 84 152 Z"/>
+      <path class="draw d3 copper-line" pathLength="1" d="M84 152 Q200 168 316 152"/>
+      <!-- stem -->
+      <path class="draw d4 glass-line" pathLength="1" d="M200 242 L200 384"/>
+      <!-- foot -->
+      <path class="draw d5 glass-line" pathLength="1" d="M116 404 Q200 380 284 404"/>
+      <path class="draw d5 glass-line" pathLength="1" d="M116 404 L284 404"/>
+      <!-- cocktail pick & cherry -->
+      <path class="draw d6 copper-line" pathLength="1" d="M262 70 L218 148"/>
+      <circle class="draw d6 copper-line outline" pathLength="1" cx="266" cy="62" r="11"/>
+      <!-- bubbles -->
+      <circle class="bub b1" cx="180" cy="138" r="4"/>
+      <circle class="bub b2" cx="214" cy="128" r="3"/>
+      <circle class="bub b3" cx="196" cy="118" r="2.4"/>
+    </svg>
+
+    <svg class="ring" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path id="ringPath" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/>
+      </defs>
+      <circle class="ring-circle" cx="100" cy="100" r="62"/>
+      <g class="ring-spin">
+        <text textLength="488" lengthAdjust="spacingAndGlyphs">
+          <textPath href="#ringPath">THE COPPER STILL &#183; EST. 2018 &#183; OLD QUARTER &#183;&#160;</textPath>
+        </text>
+      </g>
+    </svg>
+
+    <span class="glint g1">&#10038;</span>
+    <span class="glint g2">&#10038;</span>
+    <span class="glint g3">&#10038;</span>
+
+    <div class="art-caption"><span>&#8470; 02</span> &mdash; The Copper Sour, the house signature</div>
+  </div>
+
+  <div class="hero-side">Est. 2018 &mdash; Old Quarter</div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="marqueeTrack">
+    <span>Weddings</span><span class="dot">&#9670;</span>
+    <span>Corporate Dinners</span><span class="dot">&#9670;</span>
+    <span>Signature Cocktails</span><span class="dot">&#9670;</span>
+    <span>Garden Parties</span><span class="dot">&#9670;</span>
+    <span>Private Celebrations</span><span class="dot">&#9670;</span>
+    <span>Zero-Proof Menus</span><span class="dot">&#9670;</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="house">
+  <div class="frame">
+    <div class="sec-head reveal">
+      <div class="sec-num">01 / The House</div>
+    </div>
+    <div class="about-grid">
+      <div class="reveal">
+        <p class="about-lede">We believe the bar is not a corner of the room. It is the room — the place every good story at your event will begin.</p>
+        <p class="about-body">Since 2018, The Copper Still has served the city's quieter kind of celebration: the wedding that lingers past midnight, the dinner where the deal is closed over a second Negroni, the birthday no one quite remembers leaving.</p>
+        <p class="about-body">Our mixologists train in the classics and stray from them deliberately. Everything is built to order, on site, without fuss.</p>
+      </div>
+      <div class="ledger reveal">
+        <div class="ledger-row">
+          <div class="num">7<sup>yrs</sup></div>
+          <div class="lbl">In service</div>
+        </div>
+        <div class="ledger-row">
+          <div class="num">600<sup>+</sup></div>
+          <div class="lbl">Events poured</div>
+        </div>
+        <div class="ledger-row">
+          <div class="num">4,200<sup>+</sup></div>
+          <div class="lbl">Cocktails this year</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="frame">
+    <div class="sec-head reveal">
+      <div class="sec-num">02 / Services</div>
+      <h2 class="sec-title">Three ways we <em>arrive</em></h2>
+    </div>
+    <div class="svc reveal">
+      <a class="svc-row" href="#booking">
+        <div class="svc-idx">No. 1</div>
+        <div class="svc-name">Bar Catering</div>
+        <div class="svc-desc">A complete bar — staff, spirits, glassware, and a menu written for your guest list — assembled wherever you are celebrating.</div>
+        <div class="svc-arrow">&rarr;</div>
+      </a>
+      <a class="svc-row" href="#booking">
+        <div class="svc-idx">No. 2</div>
+        <div class="svc-name">Private Events</div>
+        <div class="svc-desc">Weddings, anniversaries, and dinners at home. Bespoke cocktail design, full catering available, discretion included.</div>
+        <div class="svc-arrow">&rarr;</div>
+      </a>
+      <a class="svc-row" href="#booking">
+        <div class="svc-idx">No. 3</div>
+        <div class="svc-name">Corporate</div>
+        <div class="svc-desc">Launches, client evenings, and the kind of office party people actually talk about afterwards. Polished, branded, on time.</div>
+        <div class="svc-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section id="menu">
+  <div class="frame">
+    <div class="sec-head reveal">
+      <div class="sec-num">03 / The List</div>
+      <h2 class="sec-title">Signatures &amp; <em>classics</em></h2>
+    </div>
+    <div class="list-wrap reveal">
+      <div class="list-col">
+        <h3>Spirit Forward</h3>
+        <div class="dish">
+          <div class="dish-line"><span class="dish-name">Old Fashioned</span><span class="dish-dots"></span><span class="dish-price">14</span></div>
+          <div class="dish-sub">bourbon, demerara, angostura, orange oil</div>
+        </div>
+        <div class="dish">
+          <div class="dish-line"><span class="dish-name">Negroni Rosso</span><span class="dish-dots"></span><span class="dish-price">13</span></div>
+          <div class="dish-sub">gin, campari, sweet vermouth — stirred, never shaken</div>
+        </div>
+        <div class="dish">
+          <div class="dish-line"><span class="dish-name">Mezcal Mule</span><span class="dish-dots"></span><span class="dish-price">15</span></div>
+          <div class="dish-sub">mezcal, lime, ginger beer, smoked salt, jalapeño</div>
+        </div>
+      </div>
+      <div class="list-col">
+        <h3>Bright &amp; Light</h3>
+        <div class="dish">
+          <div class="dish-line"><span class="dish-name">Copper Sour</span><span class="dish-dots"></span><span class="dish-price">13</span></div>
+          <div class="dish-sub">rye, lemon, honey, silked egg white — the house signature</div>
+        </div>
+        <div class="dish">
+          <div class="dish-line"><span class="dish-name">Elderflower Fizz</span><span class="dish-dots"></span><span class="dish-price">12</span></div>
+          <div class="dish-sub">gin, elderflower, lime, prosecco, mint</div>
+        </div>
+        <div class="dish">
+          <div class="dish-line"><span class="dish-name">Sunset Shrub</span><span class="dish-dots"></span><span class="dish-price">9</span></div>
+          <div class="dish-sub">blood orange shrub, ginger, thyme — zero proof</div>
+        </div>
+      </div>
+    </div>
+    <p class="menu-note reveal">Every list is rewritten for the event it serves. <a href="#booking">Ask for yours.</a></p>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section id="voices">
+  <div class="frame reveal">
+    <span class="quote-mark">&ldquo;</span>
+    <blockquote class="quote-text" id="quoteText">The bar at our wedding was the talk of the night. Worth every penny.</blockquote>
+    <div class="quote-who" id="quoteWho">Sophie &amp; Rian &mdash; Wedding, June 2024</div>
+    <div class="quote-nav" id="quoteNav"></div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking">
+  <div class="frame">
+    <div class="sec-head reveal">
+      <div class="sec-num">04 / Reserve</div>
+      <h2 class="sec-title">Begin the <em>evening</em></h2>
+    </div>
+    <div class="book-grid">
+      <div class="reveal">
+        <p class="book-pitch">Tell us the date and the occasion. We reply within a day, with a quote and a <em>first draft of your menu.</em></p>
+        <div class="book-meta">
+          <div><span>&mdash;</span>hello@thecopperstill.com</div>
+          <div><span>&mdash;</span>+1 (555) 842-0016</div>
+          <div><span>&mdash;</span>42 Distillery Lane, Old Quarter</div>
+        </div>
+      </div>
+      <div class="reveal">
+        <form id="bookForm" novalidate>
+          <div class="field-pair">
+            <div class="field" data-f="name">
+              <label for="bname">Name</label>
+              <input type="text" id="bname" autocomplete="name">
+              <span class="err">your name, please</span>
+            </div>
+            <div class="field" data-f="email">
+              <label for="bemail">Email</label>
+              <input type="email" id="bemail" autocomplete="email">
+              <span class="err">a valid email, please</span>
+            </div>
+          </div>
+          <div class="field-pair">
+            <div class="field" data-f="date">
+              <label for="bdate">Date</label>
+              <input type="date" id="bdate">
+              <span class="err">choose a date</span>
+            </div>
+            <div class="field" data-f="guests">
+              <label for="bguests">Guests</label>
+              <input type="number" id="bguests" min="1" placeholder="80">
+              <span class="err">how many?</span>
+            </div>
+          </div>
+          <div class="field" data-f="type">
+            <label for="btype">Occasion</label>
+            <select id="btype">
+              <option value="" selected></option>
+              <option value="wedding">Wedding</option>
+              <option value="private">Private celebration</option>
+              <option value="corporate">Corporate</option>
+              <option value="other">Something else</option>
+            </select>
+            <span class="err">what are we celebrating?</span>
+          </div>
+          <div class="field">
+            <label for="bnotes">Notes</label>
+            <textarea id="bnotes" placeholder="Venue, vision, requests…"></textarea>
+          </div>
+          <button type="submit" class="book-submit" id="bookBtn">Send Enquiry</button>
+        </form>
+        <div class="book-done" id="bookDone">
+          <h3>Received, with thanks.</h3>
+          <p>Our events team will write to you within twenty-four hours. The evening is already taking shape.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">The Copper Still</div>
+    <div class="foot-col">
+      <strong>Visit</strong>
+      42 Distillery Lane<br>
+      Old Quarter, City<br>
+      Mon&ndash;Sat, 4pm&ndash;2am
+    </div>
+    <div class="foot-col">
+      <strong>Contact</strong>
+      <a href="mailto:hello@thecopperstill.com">hello@thecopperstill.com</a><br>
+      <a href="tel:+15558420016">+1 (555) 842-0016</a>
+    </div>
+    <div class="foot-col">
+      <strong>Follow</strong>
+      <a href="#">Instagram</a><br>
+      <a href="#">Facebook</a><br>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+  <div class="foot-base">
+    <span>&copy; 2026 The Copper Still. All rights reserved.</span>
+    <a href="#top">Back to top &uarr;</a>
+  </div>
+</footer>
+
+<script>
+  // ----- loader -----
+  window.addEventListener('load', () => {
+    setTimeout(() => document.getElementById('veil').classList.add('gone'), 1900);
+  });
+
+  // ----- nav tuck -----
+  window.addEventListener('scroll', () => {
+    document.getElementById('topbar').classList.toggle('tucked', window.scrollY > 40);
+  });
+
+  // ----- drawer -----
+  function drawer(open) {
+    document.getElementById('drawer').classList.toggle('open', open);
+  }
+
+  // ----- marquee: duplicate content for a seamless loop -----
+  const track = document.getElementById('marqueeTrack');
+  track.innerHTML += track.innerHTML;
+
+  // ----- scroll reveal -----
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ----- rotating quote -----
+  const quotes = [
+    { t: 'The bar at our wedding was the talk of the night. Worth every penny.', w: 'Sophie & Rian — Wedding, June 2024' },
+    { t: 'Flawless. The custom menu with our branding was a brilliant touch.', w: 'Marcus Klein — Corporate, November 2024' },
+    { t: 'People still ask me for the recipe of my birthday cocktail.', w: 'Anna Laurens — Private Party, March 2025' },
+  ];
+  let qi = 0, qTimer;
+  const qText = document.getElementById('quoteText');
+  const qWho  = document.getElementById('quoteWho');
+  const qNav  = document.getElementById('quoteNav');
+
+  quotes.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'quote-pip' + (i === 0 ? ' on' : '');
+    b.setAttribute('aria-label', 'Quote ' + (i + 1));
+    b.onclick = () => { setQuote(i); restartQuotes(); };
+    qNav.appendChild(b);
+  });
+
+  function setQuote(i) {
+    qi = i;
+    qText.style.opacity = 0;
+    qWho.style.opacity = 0;
+    setTimeout(() => {
+      qText.textContent = quotes[qi].t;
+      qWho.textContent  = quotes[qi].w;
+      qText.style.opacity = 1;
+      qWho.style.opacity = 1;
+    }, 450);
+    [...qNav.children].forEach((p, j) => p.classList.toggle('on', j === qi));
+  }
+
+  function restartQuotes() {
+    clearInterval(qTimer);
+    qTimer = setInterval(() => setQuote((qi + 1) % quotes.length), 6500);
+  }
+  restartQuotes();
+
+  // ----- booking form -----
+  // Replace YOUR_FORM_ID with your Formspree form id (formspree.io)
+  const FORM_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+  const checks = {
+    name:   v => v.trim().length > 1,
+    email:  v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+    date:   v => v !== '',
+    guests: v => parseInt(v) > 0,
+    type:   v => v !== '',
+  };
+  const inputs = { name: 'bname', email: 'bemail', date: 'bdate', guests: 'bguests', type: 'btype' };
+
+  document.getElementById('bdate').min = new Date().toISOString().split('T')[0];
+
+  Object.entries(inputs).forEach(([key, id]) => {
+    document.getElementById(id).addEventListener('input', () => {
+      document.querySelector(`.field[data-f="${key}"]`).classList.remove('bad');
+    });
+  });
+
+  document.getElementById('bookForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    let ok = true;
+    Object.entries(inputs).forEach(([key, id]) => {
+      const good = checks[key](document.getElementById(id).value);
+      document.querySelector(`.field[data-f="${key}"]`).classList.toggle('bad', !good);
+      if (!good) ok = false;
+    });
+    if (!ok) return;
+
+    const btn = document.getElementById('bookBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          name:   document.getElementById('bname').value,
+          email:  document.getElementById('bemail').value,
+          date:   document.getElementById('bdate').value,
+          guests: document.getElementById('bguests').value,
+          type:   document.getElementById('btype').value,
+          notes:  document.getElementById('bnotes').value,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      document.getElementById('bookForm').style.display = 'none';
+      document.getElementById('bookDone').classList.add('show');
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Send Enquiry';
+      alert('Something went wrong — please email us directly at hello@thecopperstill.com');
+    }
+  });
+</script>
+</body>
+</html>
